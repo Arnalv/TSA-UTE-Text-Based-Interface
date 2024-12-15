@@ -113,14 +113,15 @@ def print_commands():
 
 
 def check_user_input(user_input):
-    if user_input == "exit":
-        return True
-    elif user_input == "help":
-        print_commands()
-    elif user_input == "ag":
-        add_group()
-    elif user_input == "a":
-        add_work()
+    match user_input:
+        case "exit":
+            return True
+        case "help":
+            print_commands()
+        case "ag":
+            add_group()
+        case "a":
+            add_work()
 
 
 while True:
