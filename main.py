@@ -8,7 +8,7 @@ break_time = 10
 # starting variables
 
 # Formatted like {work_group_name: [priority, {work_name : time_for_work}]}
-work_groups = {}
+# work_groups = {}
 
 """
 def validator(prompt, ):
@@ -76,6 +76,8 @@ def add_work(group=None, name=None, time_for_work=None):
         work_groups[group].append({name: time_for_work})
         print(f"Work '{name}' has been added to the work group '{group}'.")
 
+    print(work_groups)
+
 
 def add_group(group_name=None, group_priority=None):
     """
@@ -103,7 +105,14 @@ def add_group(group_name=None, group_priority=None):
         print("Work group already exists!")
 
 
+"""
+Testing Purposes: To test the show_schedule function, the work_groups class has a pre-defined value.
+"""
+work_groups = {"A": [5, {"HW": 20}], "B": [9, {"HW2": 30}]}
+
+
 def show_schedule():
+    global work_groups
     print("Here is your schedule for today.")
 
     # TODO ask Arnav about error, original work_groups dictionary items being deleted
@@ -111,25 +120,28 @@ def show_schedule():
     priority_ordered_work = []
 
     # A copy list made to order works by priority level
-    copy_work_groups = work_groups
+    len_of_groups = len(work_groups)
+    copy_work_groups = {}
 
-    for i in range(len(work_groups)):
+    for i in range(len_of_groups):
         priority = 0
         priority_works = None
         priority_work_group = None
-        for key, value in copy_work_groups.items():
+        for key, value in work_groups.items():
             if priority < value[0]:
                 priority = value[0]
                 priority_works = value[1]
                 priority_work_group = key
         priority_ordered_work.append(priority_works)
-        del copy_work_groups[priority_work_group]
+        del work_groups[priority_work_group]
+        copy_work_groups[priority_work_group] = priority_works
 
     print(priority_ordered_work)
     """
     time = datetime.now()
     hour_and_minutes = [time.hour, time.minute]
     """
+    work_groups = copy_work_groups
 
 
 def print_commands():
@@ -153,16 +165,17 @@ def print_commands():
 
 
 def check_user_input(user_input):
-    if user_input == "exit":
-        return True
-    elif user_input == "help":
-        print_commands()
-    elif user_input == "ag":
-        add_group()
-    elif user_input == "a":
-        add_work()
-    elif user_input == "s":
-        show_schedule()
+    match user_input:
+        case "exit":
+            return True
+        case "help":
+            print_commands()
+        case "ag":
+            add_group()
+        case "a":
+            add_work()
+        case "s":
+            show_schedule()
 
 
 while True:
