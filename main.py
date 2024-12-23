@@ -20,6 +20,10 @@ def print_commands():
           "Adds work to specific group depending on inputs\n\n"
           "r\n"
           "Removes a work from a specific group depending on the inputs\n\n"
+          "rw\n"
+          "Removes a work from a work group.\n\n"
+          "rg\n"
+          "Removes a work group.\n\n"
           "ag\n"
           "Adds a new group for work\n\n"
           "ch_d\n"
@@ -44,8 +48,12 @@ def check_user_input(user_input):
             work_groups = add_group(work_groups)
         case "a":
             add_work(work_groups)
+        case "rw":
+            work_groups = remove_work(work_groups)
+        case "rg":
+            work_groups = remove_group(work_groups)
         case "s":
-            work_groups = show_schedule(work_groups, starting_work_time)
+            work_groups = show_schedule(work_groups, break_time)
 
 
 while True:
@@ -54,5 +62,3 @@ while True:
     if check_user_input(command):
         # store_information()
         break
-
-print(work_groups)
