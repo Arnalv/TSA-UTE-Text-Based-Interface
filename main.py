@@ -1,6 +1,4 @@
-from add_work import add_work
-from add_group import add_group
-from show_schedule import show_schedule
+from functions import *
 
 # default settings
 starting_work_time = None
