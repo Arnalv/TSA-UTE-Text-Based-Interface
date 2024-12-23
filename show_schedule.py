@@ -7,7 +7,49 @@ Testing Purposes: To test the show_schedule function, the work_groups class has 
 """
 
 
-def show_schedule(work_groups, starting_time: datetime = None):
+def print_work(work, starting_time, minutes):
+    ending_time = starting_time + timedelta(minutes=minutes)
+
+    # Formating for the starting time so the minutes section would be '09' instead of '9'
+    if starting_time.minute < 10:
+        starting_time_minute = f"0{starting_time.minute}"
+    else:
+        starting_time_minute = starting_time.minute
+
+    # Formating of starting time hour section, so it displays in the 12-hour format
+    if starting_time.hour == 24:
+        starting_time_str = f"{starting_time.hour - 12}:{starting_time_minute} PM"
+    elif starting_time.hour > 12:
+        starting_time_str = f"{starting_time.hour - 12}:{starting_time_minute} PM"
+    elif starting_time.hour == 12:
+        starting_time_str = f"{starting_time.hour}:{starting_time_minute} PM"
+    else:
+        starting_time_str = f"{starting_time.hour}:{starting_time_minute} AM"
+
+    # Formating for the ending time so the minutes section would be '09' instead of '9'
+    if ending_time.minute < 10:
+        ending_time_minute = f"0{ending_time.minute}"
+    else:
+        ending_time_minute = ending_time.minute
+
+    # Formating of ending time hour section, so it displays in the 12-hour format
+    if ending_time.hour == 24:
+        ending_time_str = f"{ending_time.hour - 12}:{ending_time_minute} PM"
+    elif ending_time.hour > 12:
+        ending_time_str = f"{ending_time.hour - 12}:{ending_time_minute} PM"
+    elif ending_time.hour == 12:
+        ending_time_str = f"{ending_time.hour}:{ending_time_minute} PM"
+    else:
+        ending_time_str = f"{ending_time.hour}:{ending_time_minute} AM"
+
+    # Prints out the time for the work
+    print(f"{work}: {starting_time_str} -- {ending_time_str}")
+
+    # Returns the ending time which is going to be the starting time of the next work
+    return ending_time
+
+
+def show_schedule(work_groups: dict, break_time: int, starting_time: datetime = None):
     print("Here is your schedule for today.")
 
     # TODO ask Arnav about error, original work_groups dictionary items being deleted
@@ -36,40 +78,23 @@ def show_schedule(work_groups, starting_time: datetime = None):
     if starting_time is None:
         starting_time = datetime.now()
 
+    # A blank line for spacing
+    print("")
+
     # Prints the schedule in 'Work_Name: Start-Time -- End-Time' format
     for group_of_work in priority_ordered_work:
         for work, time in group_of_work.items():
-            ending_time = starting_time + timedelta(minutes=time)
 
-            if starting_time.minute < 10:
-                starting_time_minute = f"0{starting_time.minute}"
-            else:
-                starting_time_minute = starting_time.minute
+            # Prints the work timings
+            starting_time = print_work(work, starting_time, time)
 
-            if starting_time.hour == 24:
-                starting_time_str = f"{starting_time.hour-12}:{starting_time_minute} PM"
-            elif starting_time.hour > 12:
-                starting_time_str = f"{starting_time.hour-12}:{starting_time_minute} PM"
-            elif starting_time.hour == 12:
-                starting_time_str = f"{starting_time.hour}:{starting_time_minute} PM"
-            else:
-                starting_time_str = f"{starting_time.hour}:{starting_time_minute} AM"
+            # Blank line for spacing
+            print("")
 
-            if ending_time.minute < 10:
-                ending_time_minute = f"0{ending_time.minute}"
-            else:
-                ending_time_minute = ending_time.minute
+            # Prints break time timings
+            starting_time = print_work("BREAK TIME", starting_time, break_time)
 
-            if ending_time.hour == 24:
-                ending_time_str = f"{ending_time.hour-12}:{ending_time_minute} PM"
-            elif ending_time.hour > 12:
-                ending_time_str = f"{ending_time.hour-12}:{ending_time_minute} PM"
-            elif ending_time.hour == 12:
-                ending_time_str = f"{ending_time.hour}:{ending_time_minute} PM"
-            else:
-                ending_time_str = f"{ending_time.hour}:{ending_time_minute} AM"
-
-            print(f"{work}: {starting_time_str} -- {ending_time_str}")
-            starting_time = ending_time
+            # Blank line for spacing
+            print("")
 
     return work_groups

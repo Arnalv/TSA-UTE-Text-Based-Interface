@@ -1,6 +1,7 @@
 from add_work import add_work
 from add_group import add_group
 from show_schedule import show_schedule
+from remove import remove_work, remove_group
 
 # default settings
 starting_work_time = None
@@ -10,9 +11,9 @@ break_time = 10
 # starting variables
 
 # Formatted like {work_group_name: [priority, {work_name : time_for_work}]}
-work_groups = {}
+# work_groups = {}
 # For Testing
-# work_groups = {"A": [5, {"HW": 20}], "B": [9, {"HW2": 30}]}
+work_groups = {"A": [5, {"HW": 20}], "B": [9, {"HW2": 30}], "C": [9]}
 
 
 def print_commands():
@@ -20,8 +21,10 @@ def print_commands():
     print("Here are a list of commands with descriptions:\n"
           "a\n"
           "Adds work to specific group depending on inputs\n\n"
-          "r\n"
-          "Removes a work from a specific group depending on the inputs\n\n"
+          "rw\n"
+          "Removes a work from a specific group\n\n"
+          "rg\n"
+          "Removes a group of work\n\n"
           "ag\n"
           "Adds a new group for work\n\n"
           "ch_d\n"
@@ -47,7 +50,11 @@ def check_user_input(user_input):
         case "a":
             add_work(work_groups)
         case "s":
-            work_groups = show_schedule(work_groups, starting_work_time)
+            work_groups = show_schedule(work_groups, break_time, starting_work_time)
+        case "rw":
+            work_groups = remove_work(work_groups)
+        case "rg":
+            work_groups = remove_group(work_groups)
 
 
 while True:
