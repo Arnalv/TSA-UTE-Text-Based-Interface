@@ -2,15 +2,17 @@ from functions import *
 
 # default settings
 starting_work_time = None
-ending_work_time = None
 break_time = 10
 
 # starting variables
 
 # Formatted like {work_group_name: [priority, {work_name : time_for_work}]}
-work_groups = {}
+# work_groups = {}
 # For Testing
-# work_groups = {"A": [5, {"HW": 20}], "B": [9, {"HW2": 30}]}
+work_groups = {"A": [5, {"HW": 20}], "B": [9, {"HW2": 30}], "C": [10]}
+
+# Schedule Variable that contains the schedule with the break times (Allows the user to edit specific break times)
+schedule = []
 
 
 def print_commands():
@@ -28,9 +30,9 @@ def print_commands():
           "Adds a new group for work\n\n"
           "ch_d\n"
           "Changes default settings such as break time depending on the inputs\n\n"
-          "ch_b\n"
-          "Allows you to edit specific break times or work times (please remember that adding too much time may cause "
-          "the total work time to increase)\n\n"
+          "ch_s\n"
+          "Allows you to edit specific break times or work times in the schedule (please remember that adding too "
+          "much time may cause the total work time to increase)\n\n"
           "s\n"
           "Shows completed schedule.\n\n"
           "exit\n"
@@ -39,6 +41,9 @@ def print_commands():
 
 def check_user_input(user_input):
     global work_groups
+    global break_time
+    global starting_work_time
+    global schedule
     match user_input:
         case "exit":
             return True
@@ -47,13 +52,23 @@ def check_user_input(user_input):
         case "ag":
             work_groups = add_group(work_groups)
         case "a":
-            add_work(work_groups)
+            work_groups = add_work(work_groups)
         case "rw":
             work_groups = remove_work(work_groups)
         case "rg":
             work_groups = remove_group(work_groups)
         case "s":
-            work_groups = show_schedule(work_groups, break_time)
+            return_items = show_schedule(work_groups, break_time, schedule, starting_work_time)
+            work_groups = return_items["work_groups"]
+            schedule = return_items["schedule"]
+        case "ch_d":
+            default_settings = change_default_settings(break_time=break_time, starting_time=starting_work_time)
+            break_time = default_settings["break_time"]
+            starting_work_time = default_settings["starting_time"]
+        case "ch_s":
+            return_items = change_schedule(work_groups, schedule, break_time, starting_work_time)
+            work_groups = return_items["work_groups"]
+            schedule = return_items["original_schedule"]
 
 
 while True:
