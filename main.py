@@ -7,12 +7,16 @@ break_time = 10
 # starting variables
 
 # Formatted like {work_group_name: [priority, {work_name : time_for_work}]}
-# work_groups = {}
+work_groups = {}
 # For Testing
-work_groups = {"A": [5, {"HW": 20}], "B": [9, {"HW2": 30}], "C": [10]}
+# work_groups = {"A": [5, {"HW": 20, "HW3": 50}], "B": [9, {"HW2": 30}], "C": [10]}
 
 # Schedule Variable that contains the schedule with the break times (Allows the user to edit specific break times)
 schedule = []
+
+# A variable to store previous works, at the end of the code this will be store in a file for future reference
+# Format: [{work, time}, {work, time}]
+previously_added_works = []
 
 
 def print_commands():
@@ -44,6 +48,7 @@ def check_user_input(user_input):
     global break_time
     global starting_work_time
     global schedule
+    global previously_added_works
     match user_input:
         case "exit":
             return True
@@ -52,9 +57,10 @@ def check_user_input(user_input):
         case "ag":
             work_groups = add_group(work_groups)
         case "a":
-            return_items = add_work(work_groups, schedule, break_time)
+            return_items = add_work(previously_added_works, work_groups, schedule, break_time)
             work_groups = return_items["work_groups"]
             schedule = return_items["updated_schedule"]
+            previously_added_works = return_items["previously_added_works"]
         case "rw":
             return_items = remove_work(work_groups, schedule, break_time)
             work_groups = return_items["work_groups"]
@@ -75,9 +81,25 @@ def check_user_input(user_input):
             schedule = return_items["original_schedule"]
 
 
+try:
+    with open(mode="r", file="./previous_works.txt") as previous_works_file:
+        lines = previous_works_file.readlines()
+        for line in lines:
+            work_name = line.split(sep=", ")[0]
+            time = int(line.split(sep=", ")[1].split(sep="\n")[0])
+            previously_added_works.append({work_name, time})
+    print(previously_added_works)
+except FileNotFoundError:
+    previous_works_file = open(mode="x", file="./previous_works.txt")
+    previous_works_file.close()
+
 while True:
     # TODO need to add code on checking for new user
     command = input("Please type 'Help' to see what commands you can use: ").lower()
     if check_user_input(command):
-        # store_information()
+        with open(mode="w", file="./previous_works.txt") as previous_works_file:
+            print(previously_added_works)
+            for work in previously_added_works:
+                for work_name, time in work.items():
+                    previous_works_file.write(f"{work_name}, {time}\n")
         break

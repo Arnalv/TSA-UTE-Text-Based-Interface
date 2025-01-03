@@ -183,7 +183,9 @@ def add_group(original_work_groups, group_name=None, group_priority=None):
     return work_groups
 
 
-def add_work(work_groups, original_schedule, break_time, group=None, name=None, time_for_work=None):
+def add_work(previous_works, work_groups, original_schedule, break_time, group=None, name=None, time_for_work=None):
+    # To make sure if a name submitted by the previous_works is not added when adding from previous works
+    original_duplicate_name = False
     # Takes input from user if not already provided
     if group is None:
         # Checks if work_groups is empty
@@ -214,35 +216,104 @@ def add_work(work_groups, original_schedule, break_time, group=None, name=None, 
                         group = key
             # Allows the user to add a new group and a work for the group
             else:
-                work_groups = add_group(work_groups, original_schedule)
-                work_groups = add_work(work_groups, original_schedule, break_time)
+                work_groups = add_group(work_groups)
+
+                return_items = add_work(previous_works, work_groups, original_schedule, break_time)
+                work_groups = return_items["work_groups"]
+                original_schedule = return_items["updated_schedule"]
+                previous_works = return_items["previously_added_works"]
+
+                # Updates the original_schedule variable to match work_groups
                 return_items = (
                     update_schedule(work_groups=work_groups, original_schedule=original_schedule,
                                     break_time=break_time))
+
+                # The items needed to be returned
+                return_items = {
+                    "previously_added_works": previous_works,
+                    "work_groups": return_items["work_groups"],
+                    "updated_schedule": return_items["updated_schedule"],
+                }
+
+                # Returns the items
                 return return_items
         # Allows the user to a work group since the dictionary work_groups is empty
         else:
             print("No work groups detected.")
             print("You will need to add a work group first.")
             work_groups = add_group(work_groups)
-            work_groups = add_work(work_groups, original_schedule, break_time)
+
+            return_items = add_work(previous_works, work_groups, original_schedule, break_time)
+            work_groups = return_items["work_groups"]
+            original_schedule = return_items["updated_schedule"]
+            previous_works = return_items["previously_added_works"]
+
+            # Updates the original_schedule variable to match work_groups
             return_items = (
                 update_schedule(work_groups=work_groups, original_schedule=original_schedule, break_time=break_time))
+
+            # The items needed to be returned
+            return_items = {
+                "previously_added_works": previous_works,
+                "work_groups": return_items["work_groups"],
+                "updated_schedule": return_items["updated_schedule"],
+            }
+
+            # Returns the items
             return return_items
 
     # Checks if the name of the group is not provided and gets an input from the user if not provided
     if name is None:
+        # Helps in checking if a name given is a duplicated name in the future
+        already_checked = False
+
+        # Only runs the code if previous works is not empty
+        if previous_works:
+            check_previous_works = input("Do you want to add a previously added work to the group (y/n)? ")
+
+            if check_previous_works == "y":
+                count = 0
+                for work in previous_works:
+                    count += 1
+                    print(f"{count}. {work}")
+
+                user_choice = int(input("Which previously added work do you want to add to the group? "))
+
+                for work, time in previous_works[user_choice-1].items():
+                    name = work
+                    user_choice = input("Do you want to change the amount of time this work takes (y/n)? ").lower()
+                    if user_choice == "y":
+                        new_time = int(input("What do you want to change the time to? "))
+                    else:
+                        new_time = time
+
+                    time_for_work = new_time
+
+                # All the following code until the end of the 'if condition'
+                # check if the name provided is duplicate name
+                duplicate_name = False
+                for work_group, work_group_details in work_groups.items():
+                    if len(work_group_details) > 1:
+                        if name in work_group_details[1]:
+                            duplicate_name = True
+                            original_duplicate_name = True
+                if duplicate_name:
+                    print("The name of the previous work already exists. Please enter another name for the work.")
+                else:
+                    already_checked = True
+
         # Checks if the name that the user has given already exists
-        duplicate_name = True
-        while duplicate_name:
-            duplicate_name = False
-            name = input("Please enter the name of this work: ")
-            for work_group in work_groups:
-                for work in work_group:
-                    if name == work:
-                        duplicate_name = True
-            if duplicate_name:
-                print("A work or a work group with this name already exists. Please enter another name.")
+        if not already_checked:
+            duplicate_name = True
+            while duplicate_name:
+                duplicate_name = False
+                name = input("Please enter the name of the work: ")
+                for work_group, work_group_details in work_groups.items():
+                    if len(work_group_details) > 1:
+                        if name in work_group_details[1]:
+                            duplicate_name = True
+                if duplicate_name:
+                    print("A work with this name already exists. Please enter another name.")
 
     # Asks the user for the time of the work if not already provided
     if time_for_work is None:
@@ -260,12 +331,25 @@ def add_work(work_groups, original_schedule, break_time, group=None, name=None, 
 
     # Add the work to the specific group
     else:
-        work_groups[group].append({name: time_for_work})
+        if len(work_groups[group]) == 1:
+            work_groups[group].append({name: time_for_work})
+        else:
+            work_groups[group][1][name] = time_for_work
+
+        if not original_duplicate_name:
+            previous_works.append({name: time_for_work})
         print(f"Work '{name}' has been added to the work group '{group}'.")
 
-    # The items needed to be returned
+    # Updates the original_schedule variable to match work_groups
     return_items = (
         update_schedule(work_groups=work_groups, original_schedule=original_schedule, break_time=break_time))
+
+    # The items needed to be returned
+    return_items = {
+        "previously_added_works": previous_works,
+        "work_groups": return_items["work_groups"],
+        "updated_schedule": return_items["updated_schedule"],
+    }
 
     # Returns the items
     return return_items
@@ -279,6 +363,8 @@ Testing Purposes: To test the show_schedule function, the work_groups class has 
 
 
 def update_schedule(work_groups, original_schedule, break_time):
+    # print("Update_schedule called")
+    # print(f"work_groups: {work_groups}")
     # Creates a list of works in order of priority
     # Goal: Formatted like {work: time, work: time, work: time}
     priority_ordered_work = {}
@@ -317,6 +403,7 @@ def update_schedule(work_groups, original_schedule, break_time):
 
         # Appends the works in the priority_ordered_works dictionary
         for work in priority_works:
+            # print(work)
             priority_ordered_work[work] = priority_works[work]
 
         # Copies the work group into a list
@@ -327,13 +414,17 @@ def update_schedule(work_groups, original_schedule, break_time):
     # Runs if the original_schedule list contains items,
     # if it doesn't, just fills it with items in the priority_order_work
     if original_schedule:
+        # print("Entered if condition: original schedule")
 
         # Takes in the lengths of both lists
         original_schedule_length = len(original_schedule)
         priority_ordered_work_length = len(priority_ordered_work)
+        # print(f"Priority_ordered_work: {priority_ordered_work}")
+        # print(f"original_schedule_length: {priority_ordered_work_length}")
 
         # Compares both list to check if something has been added to the priority_order_work
         if priority_ordered_work_length > original_schedule_length:
+            # print("Entered if condition: priority_ordered_work_length > original_schedule_length")
 
             # Sets the count to zero to keep track of the placement of the added work
             count = 0
@@ -345,9 +436,11 @@ def update_schedule(work_groups, original_schedule, break_time):
                 work_exist = False
 
                 # Compares works to see if anything matches
-                if len(original_schedule) >= count:
+                # print(f"count: {count}")
+                if len(original_schedule) > count:
                     for original_work in original_schedule[count]:
                         if work in original_work:
+                            # print("work_exist changes to true")
                             work_exist = True
                 else:
                     work_exist = True
@@ -383,6 +476,7 @@ def update_schedule(work_groups, original_schedule, break_time):
         "updated_schedule": original_schedule,
     }
 
+    # print(original_schedule)
     # Returns the variables
     return return_items
 
