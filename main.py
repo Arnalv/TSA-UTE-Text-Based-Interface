@@ -52,9 +52,13 @@ def check_user_input(user_input):
         case "ag":
             work_groups = add_group(work_groups)
         case "a":
-            work_groups = add_work(work_groups)
+            return_items = add_work(work_groups, schedule, break_time)
+            work_groups = return_items["work_groups"]
+            schedule = return_items["updated_schedule"]
         case "rw":
-            work_groups = remove_work(work_groups)
+            return_items = remove_work(work_groups, schedule, break_time)
+            work_groups = return_items["work_groups"]
+            schedule = return_items["updated_schedule"]
         case "rg":
             work_groups = remove_group(work_groups)
         case "s":
