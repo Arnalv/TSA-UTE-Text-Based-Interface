@@ -6,13 +6,11 @@ break_time = 10
 
 # starting variables
 
-# Formatted like {work_group_name: [priority, {work_name : time_for_work}]}
+# Formatted like {work_group_name: [priority, {work_name : [time_for_work, break_time]}]}
 work_groups = {}
 # For Testing
+# work_groups = {"A": [5]}
 # work_groups = {"A": [5, {"HW": 20, "HW3": 50}], "B": [9, {"HW2": 30}], "C": [10]}
-
-# Schedule Variable that contains the schedule with the break times (Allows the user to edit specific break times)
-schedule = []
 
 # A variable to store previous works, at the end of the code this will be store in a file for future reference
 # Format: [{work, time}, {work, time}]
@@ -47,38 +45,53 @@ def check_user_input(user_input):
     global work_groups
     global break_time
     global starting_work_time
-    global schedule
     global previously_added_works
     match user_input:
         case "exit":
             return True
         case "help":
             print_commands()
-        case "ag":
+        case "add_group":
             work_groups = add_group(work_groups)
-        case "a":
-            return_items = add_work(previously_added_works, work_groups, schedule, break_time)
+        case "add_work":
+            return_items = add_work(previously_added_works, work_groups, break_time)
             work_groups = return_items["work_groups"]
-            schedule = return_items["updated_schedule"]
             previously_added_works = return_items["previously_added_works"]
-        case "rw":
-            return_items = remove_work(work_groups, schedule, break_time)
-            work_groups = return_items["work_groups"]
-            schedule = return_items["updated_schedule"]
-        case "rg":
+        case "remove_work":
+            work_groups = remove_work(work_groups, break_time)
+        case "remove_group":
             work_groups = remove_group(work_groups)
-        case "s":
-            return_items = show_schedule(work_groups, break_time, schedule, starting_work_time)
-            work_groups = return_items["work_groups"]
-            schedule = return_items["schedule"]
-        case "ch_d":
+        case "show_schedule":
+            work_groups = show_schedule(work_groups, starting_work_time)
+        case "change_default_settings":
             default_settings = change_default_settings(break_time=break_time, starting_time=starting_work_time)
             break_time = default_settings["break_time"]
             starting_work_time = default_settings["starting_time"]
-        case "ch_s":
-            return_items = change_schedule(work_groups, schedule, break_time, starting_work_time)
-            work_groups = return_items["work_groups"]
-            schedule = return_items["original_schedule"]
+        case "change_schedule":
+            work_groups = change_schedule(work_groups, starting_work_time)
+
+
+# For testing later:
+# print(work_groups)
+# name = input("What is the name of the work? ")
+# time = int(input("What is the time in minutes for this work? "))
+#
+# return_items = add_work(name=name, time_for_work=time, group="A", previous_works=previously_added_works,
+#                         work_groups=work_groups, break_time=break_time)
+# work_groups = return_items["work_groups"]
+# previously_added_works = return_items["previously_added_works"]
+#
+# print(work_groups)
+#
+# name = input("What is the name of the work? ")
+# time = int(input("What is the time in minutes for this work? "))
+#
+# return_items = add_work(name=name, time_for_work=time, group="A", previous_works=previously_added_works,
+#                         work_groups=work_groups, break_time=break_time)
+# work_groups = return_items["work_groups"]
+# previously_added_works = return_items["previously_added_works"]
+#
+# print(work_groups)
 
 
 try:
@@ -88,7 +101,6 @@ try:
             work_name = line.split(sep=", ")[0]
             time = int(line.split(sep=", ")[1].split(sep="\n")[0])
             previously_added_works.append({work_name, time})
-    print(previously_added_works)
 except FileNotFoundError:
     previous_works_file = open(mode="x", file="./previous_works.txt")
     previous_works_file.close()
@@ -98,7 +110,6 @@ while True:
     command = input("Please type 'Help' to see what commands you can use: ").lower()
     if check_user_input(command):
         with open(mode="w", file="./previous_works.txt") as previous_works_file:
-            print(previously_added_works)
             for work in previously_added_works:
                 for work_name, time in work.items():
                     previous_works_file.write(f"{work_name}, {time}\n")
