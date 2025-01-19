@@ -1,4 +1,4 @@
-from functions import *
+from text_parser import *
 
 # default settings
 starting_work_time = None
@@ -20,22 +20,22 @@ previously_added_works = []
 def print_commands():
     # TODO figure out how to clear the screen (ask Arnav)
     print("Here are a list of commands with descriptions:\n"
-          "a\n"
+          "add work\n"
           "Adds work to specific group depending on inputs\n\n"
-          "r\n"
+          "remove work\n"
           "Removes a work from a specific group depending on the inputs\n\n"
-          "rw\n"
+          "remove work\n"
           "Removes a work from a work group.\n\n"
-          "rg\n"
+          "remove group\n"
           "Removes a work group.\n\n"
-          "ag\n"
+          "add group\n"
           "Adds a new group for work\n\n"
-          "ch_d\n"
+          "change default settings\n"
           "Changes default settings such as break time depending on the inputs\n\n"
-          "ch_s\n"
+          "change schedule\n"
           "Allows you to edit specific break times or work times in the schedule (please remember that adding too "
           "much time may cause the total work time to increase)\n\n"
-          "s\n"
+          "show schedule\n"
           "Shows completed schedule.\n\n"
           "exit\n"
           "Exits application.")
@@ -51,23 +51,24 @@ def check_user_input(user_input):
             return True
         case "help":
             print_commands()
-        case "add_group":
-            work_groups = add_group(work_groups)
-        case "add_work":
-            return_items = add_work(previously_added_works, work_groups, break_time)
+        case "add group":
+            work_groups = add_group_parser(work_groups)
+        case "add work":
+            return_items = add_work_parser(previous_works=previously_added_works, break_time=5, work_groups=work_groups)
+
             work_groups = return_items["work_groups"]
             previously_added_works = return_items["previously_added_works"]
-        case "remove_work":
+        case "remove work":
             work_groups = remove_work(work_groups, break_time)
-        case "remove_group":
+        case "remove group":
             work_groups = remove_group(work_groups)
-        case "show_schedule":
+        case "show schedule":
             work_groups = show_schedule(work_groups, starting_work_time)
-        case "change_default_settings":
+        case "change default settings":
             default_settings = change_default_settings(break_time=break_time, starting_time=starting_work_time)
             break_time = default_settings["break_time"]
             starting_work_time = default_settings["starting_time"]
-        case "change_schedule":
+        case "change schedule":
             work_groups = change_schedule(work_groups, starting_work_time)
 
 
@@ -100,7 +101,7 @@ try:
         for line in lines:
             work_name = line.split(sep=", ")[0]
             time = int(line.split(sep=", ")[1].split(sep="\n")[0])
-            previously_added_works.append({work_name, time})
+            previously_added_works.append({work_name: time})
 except FileNotFoundError:
     previous_works_file = open(mode="x", file="./previous_works.txt")
     previous_works_file.close()
