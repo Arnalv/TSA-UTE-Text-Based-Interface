@@ -59,7 +59,7 @@ def check_user_input(user_input):
             work_groups = return_items["work_groups"]
             previously_added_works = return_items["previously_added_works"]
         case "remove work":
-            work_groups = remove_work(work_groups, break_time)
+            work_groups = remove_work(work_groups)
         case "remove group":
             work_groups = remove_group(work_groups)
         case "show schedule":
@@ -114,4 +114,45 @@ while True:
             for work in previously_added_works:
                 for work_name, time in work.items():
                     previous_works_file.write(f"{work_name}, {time}\n")
+
+        if starting_work_time is None:
+            starting_work_time = datetime.now()
+
+        with open(mode="w", file="./schedule.txt") as schedule_file:
+            write_lines = ["Here is your schedule for today.\n"]
+
+            # Calls the update schedule function which organizes the works by their priority in the
+            # format of [{work: time}, {work: time}].
+            # Checks if calling it is needed
+            outputs = organize_by_priority(work_groups=work_groups)
+            work_groups = outputs["work_groups"]
+            priority_ordered_schedule = outputs["priority_ordered_work"]
+
+            # Prints the schedule in 'Work_Name: Start-Time -- End-Time' format
+            for work_name, work_details in priority_ordered_schedule.items():
+                ending_time = starting_work_time + timedelta(minutes=work_details[0])
+
+                starting_time_str = format_time(starting_work_time)
+                ending_time_str = format_time(ending_time)
+
+                # Prints out the time for the work
+                write_lines.append(f"{work_name}: {starting_time_str} -- {ending_time_str}\n")
+                starting_work_time = ending_time
+
+                # Blank line for spacing
+                write_lines.append("\n")
+
+                ending_time = starting_work_time + timedelta(minutes=work_details[1])
+
+                starting_time_str = format_time(starting_work_time)
+                ending_time_str = format_time(ending_time)
+
+                # Prints out the time for the work
+                write_lines.append(f"BREAK TIME: {starting_time_str} -- {ending_time_str}\n")
+                starting_work_time = ending_time
+
+                # Blank line for spacing
+                write_lines.append("\n")
+
+            schedule_file.writelines(write_lines)
         break
