@@ -25,43 +25,46 @@ def add_work_parser(previous_works, break_time, work_groups):
     time = None
 
     # Only runs the code if previous works is not empty
+    check_previous_works = 'n'
     if previous_works:
         # Asks user if they want to add a previously added work
-        check_previous_works = input("Do you want to add a previously added work to the group (y/n)? ").lower()
+        check_previous_works = yes_or_no("Do you want to add a previously added work to the group (y/n)? ")
 
-        # Runs the code if the user input yes
-        if check_previous_works == "y":
+    # Runs the code if the user input yes
+    if check_previous_works == "y":
 
-            # Displays to the user the options
-            count = 0
-            for work in previous_works:
-                count += 1
-                print(f"{count}. {work}")
+        # Displays to the user the options
+        count = 0
+        for work in previous_works:
+            count += 1
+            print(f"{count}. {work}")
 
-            # Asks user about their choice
-            user_choice = int(input("Which previously added work do you want to add? "))
+        # Asks user about their choice
+        user_choice = int(input("Which previously added work do you want to add? "))
 
-            # Updates the values accordingly
-            for work_name, time in previous_works[user_choice - 1].items():
-                # Updates the name
-                work = work_name
-                # Asks the user if they want to change the time of the given work
-                user_choice = input("Do you want to change the amount of time this work takes (y/n)? ").lower()
-                if user_choice == "y":
-                    new_time = int(input("What do you want to change the time to? "))
-                else:
-                    new_time = time
-                # Updates the time
-                time = new_time
-
-            # Checks if it is duplicate name and tells user to that duplicate names can't be added if it is a
-            # duplicate
-            if check_duplicate(work_groups=work_groups, work_name=work):
-                print("A work already exists with a name as this previous work.")
-                print("The previous work has not been added.")
-                return return_items
+        # Updates the values accordingly
+        for work_name, time in previous_works[user_choice - 1].items():
+            # Updates the name
+            work = work_name
+            # Asks the user if they want to change the time of the given work
+            user_choice = yes_or_no(
+                prompt="Do you want to change the amount of time this work takes (y/n)? "
+            )
+            if user_choice == "y":
+                new_time = int(input("What do you want to change the time to? "))
             else:
-                group = input("What group do want to enter this work to? ")
+                new_time = time
+            # Updates the time
+            time = new_time
+
+        # Checks if it is duplicate name and tells user to that duplicate names can't be added if it is a
+        # duplicate
+        if check_duplicate(work_groups=work_groups, work_name=work):
+            print("A work already exists with a name as this previous work.")
+            print("The previous work has not been added.")
+            return return_items
+        else:
+            group = input("What group do want to enter this work to? ")
 
     else:
         print(f"Format for best results: {add_work_parser_details}")
@@ -99,7 +102,7 @@ def add_work_parser(previous_works, break_time, work_groups):
             if work in previous_work:
                 work_exists_in_previous_works = True
 
-    if not work_exists_in_previous_works:
+    if not work_exists_in_previous_works and work is not None:
         previous_works.append({work: time})
 
     work_groups = add_work(work_groups=work_groups, break_time=break_time, group=group, name=work, time_for_work=time)

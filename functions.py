@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from input_validation import *
 
 
 def show_options(work_groups):
@@ -12,7 +13,7 @@ def show_options(work_groups):
         if len(work_groups[group]) != 1:
             for work, time in work_section[1].items():
                 work_count += 1
-                print(f"    {work_count}. {work}, time:   {time} min")
+                print(f"    {work_count}. {work}, time:   {time[0]} min")
                 work_list.append(work)
         work_groups_list.append(work_list)
 
@@ -29,9 +30,11 @@ def remove_group(work_groups: dict, removing_group=None) -> dict:
         # Checks if the removing group has been provided
         if removing_group is None:
             work_groups_list = show_options(work_groups)
-            group_access_integer = (
-                    int(input("Enter the number corresponding to the group you want to remove: ")) - 1
-            )
+            length = len(work_groups)
+            group_access_integer = integer_validator(
+                prompt="Enter the number corresponding to the group you want to remove: ",
+                minimum=1,
+                maximum=length) - 1
             group_key = work_groups_list[group_access_integer][0]
         else:
             group_key = removing_group
@@ -48,18 +51,24 @@ def remove_work(work_groups: dict, removing_work: list = None) -> dict:
     if work_groups:
         if removing_work is None:
             work_groups_list = show_options(work_groups)
-            group_access_integer = (
-                    int(input("Enter the number corresponding to the group of the work you want to remove: ")) - 1
-            )
+
+            length = len(work_groups_list)
+            group_access_integer = integer_validator(
+                prompt="Enter the number corresponding to the group of the work you want to remove: ",
+                minimum=1,
+                maximum=length) - 1
+
             group_key = work_groups_list[group_access_integer][0]
             if len(work_groups_list[group_access_integer]) == 1:
                 print("There are no works to remove in this work group.")
                 print("If you want to remove the group, use remove_group.")
                 return work_groups
             else:
-                work_access_integer = (
-                    int(input("Enter the number corresponding to the work you want to remove: "))
-                )
+                length = len(work_groups_list[group_access_integer]) - 1
+                work_access_integer = integer_validator(
+                    prompt="Enter the number corresponding to the work you want to remove: ",
+                    minimum=1,
+                    maximum=length)
 
                 work_key = work_groups_list[group_access_integer][work_access_integer]
         else:
@@ -146,10 +155,9 @@ def add_work(work_groups, break_time, group=None, name=None, time_for_work=None)
 
         # Tells the user that there are no work groups present, and you can't add a work
         else:
-            print("No work groups detected.")
-            print("You will need to add a work group first using 'add_group' or provide name of the group when asked.")
-
-            return work_groups
+            # print("No work groups detected.")
+            group = input("Group Name: ")
+        # print("You will need to add a work group first using 'add_group' or provide name of the group when asked.")
 
     # Checks if the name of the group is not provided and gets an input from the user if not provided
     if name is None:
@@ -171,10 +179,7 @@ def add_work(work_groups, break_time, group=None, name=None, time_for_work=None)
 
     # Checks if a provided group is not in work_groups
     if group not in work_groups:
-        group_response = input(f"Group not found. Would you like to add a group called '{group}'? (y/n) ").lower()
-        while group_response != "y" and group_response != "n":
-            group_response = input(
-                "Group not found. Would you like to add a group called " + group + " ? (y/n) ").lower()
+        group_response = yes_or_no(f"Group not found. Would you like to add a group called '{group}' (y/n)? ")
         if group_response == "y":
             # Adds the group
             work_groups = add_group(group_name=group, original_work_groups=work_groups)
@@ -233,13 +238,14 @@ def print_work_with_time(work, starting_time, minutes):
 def change_default_settings(break_time: int, starting_time: datetime = datetime.now()) -> dict:
     # Prints the current options
     print(f"1. Break Time: {break_time}")
-    if starting_time is None:
+    if starting_time.minute == datetime.now().minute:
         print(f"2. Starting_Time: Current Time")
     else:
-        print(f"Starting Time: {format_time(starting_time)}")
+        print(f"2. Starting Time: {format_time(starting_time)}")
 
     # Asks the user to choose
-    user_choice = int(input("Choose the number corresponding to the setting you want to change (1-2): "))
+    user_choice = integer_validator(prompt="Choose the number corresponding to the setting you want to change (1-2): ",
+                                    minimum=1, maximum=2)
 
     # Updates the corresponding values with user inputs
     if user_choice == 1:
@@ -255,7 +261,7 @@ def change_default_settings(break_time: int, starting_time: datetime = datetime.
         print(f"'Starting Time' has been changed to {format_time(starting_time)}.")
 
     # Asks the user if they want to change something else
-    change_again = input("Do you want to change another default setting (y/n)? ").lower()
+    change_again = yes_or_no("Do you want to change another default setting (y/n)? ")
 
     # Does recursion if true
     if change_again == "y":
@@ -410,7 +416,8 @@ def change_schedule(work_groups, starting_time=None):
             print("")
 
         # After displaying, asks the user to choose the number of the item they want to change
-        user_choice = int(input("Select the number corresponding to the part you want to change: "))
+        user_choice = integer_validator(prompt="Select the number corresponding to the part you want to change: ",
+                                        minimum=1, maximum=count)
 
         # Makes the changes in the actual work_groups
         count = 0
@@ -434,7 +441,7 @@ def change_schedule(work_groups, starting_time=None):
         print("Change has been successful.")
 
         # Asks the user if they want to change another item in the schedule
-        change_again = input("Do you want to change something else (y/n)? ").lower()
+        change_again = yes_or_no("Do you want to change something else (y/n)? ")
 
         # Checks the answer and does recursion
         if change_again == "y":
