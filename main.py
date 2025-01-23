@@ -1,4 +1,5 @@
 from text_parser import *
+import os
 
 # default settings
 starting_work_time = None
@@ -10,7 +11,7 @@ break_time = 10
 work_groups = {}
 # For Testing
 # work_groups = {"A": [5]}
-# work_groups = {"A": [5, {"HW": 20, "HW3": 50}], "B": [9, {"HW2": 30}], "C": [10]}
+# work_groups = {"A": [5, {"HW": [20, 5], "HW3": [50, 5]}], "B": [9, {"HW2": [30, 5]}], "C": [10]}
 
 # A variable to store previous works, at the end of the code this will be store in a file for future reference
 # Format: [{work, time}, {work, time}]
@@ -72,29 +73,6 @@ def check_user_input(user_input):
             work_groups = change_schedule(work_groups, starting_work_time)
 
 
-# For testing later:
-# print(work_groups)
-# name = input("What is the name of the work? ")
-# time = int(input("What is the time in minutes for this work? "))
-#
-# return_items = add_work(name=name, time_for_work=time, group="A", previous_works=previously_added_works,
-#                         work_groups=work_groups, break_time=break_time)
-# work_groups = return_items["work_groups"]
-# previously_added_works = return_items["previously_added_works"]
-#
-# print(work_groups)
-#
-# name = input("What is the name of the work? ")
-# time = int(input("What is the time in minutes for this work? "))
-#
-# return_items = add_work(name=name, time_for_work=time, group="A", previous_works=previously_added_works,
-#                         work_groups=work_groups, break_time=break_time)
-# work_groups = return_items["work_groups"]
-# previously_added_works = return_items["previously_added_works"]
-#
-# print(work_groups)
-
-
 try:
     with open(mode="r", file="./previous_works.txt") as previous_works_file:
         lines = previous_works_file.readlines()
@@ -106,6 +84,35 @@ except FileNotFoundError:
     previous_works_file = open(mode="x", file="./previous_works.txt")
     previous_works_file.close()
 
+if os.path.isfile("./work_groups.txt"):
+    # Formatted like {work_group_name: [priority, {work_name : [time_for_work, break_time]}]}
+    with open(mode="r", file="./work_groups.txt") as work_groups_file:
+        work_groups_str = work_groups_file.readline().strip().split(sep="Work Groups: ")[1].split()
+        works_str = work_groups_file.readline().strip().split("Corresponding Works: ")[1].split("New Group: ")[1:]
+
+        works_list = []
+        for work in works_str:
+            work_list = [work[0]]
+            all_works_str = work[3:].split("New Work: ")[1:]
+            if all_works_str:
+                all_works_str = [text.split(", ")[:len(text.split(", "))-1] for text in all_works_str]
+                for single_work_details in all_works_str:
+                    if not len(work_list) > 1:
+                        work_list.append({single_work_details[0]: [int(single_work_details[1]),
+                                                                   int(single_work_details[2])]})
+                    else:
+                        work_list[1][single_work_details[0]] = [int(single_work_details[1]),
+                                                                int(single_work_details[2])]
+            works_list.append(work_list)
+
+        count = 0
+        for work_list in works_list:
+            work_groups[work_groups_str[count]] = work_list
+            count += 1
+else:
+    work_groups_file = open(mode="x", file="./work_groups.txt")
+    work_groups_file.close()
+
 while True:
     # TODO need to add code on checking for new user
     command = input("Please type 'Help' to see what commands you can use: ").lower()
@@ -114,6 +121,21 @@ while True:
             for work in previously_added_works:
                 for work_name, time in work.items():
                     previous_works_file.write(f"{work_name}, {time}\n")
+
+        with open(mode="w", file="work_groups.txt") as work_groups_file:
+            if work_groups:
+                work_groups_file.write("Work Groups: ")
+                for work_group in work_groups:
+                    work_groups_file.write(work_group + " ")
+
+                work_groups_file.write("\nCorresponding Works: ")
+                for work_group, work_group_details in work_groups.items():
+                    if len(work_group_details) != 1:
+                        work_groups_file.write(f"New Group: {work_group_details[0]}, ")
+                        for work, work_details in work_group_details[1].items():
+                            work_groups_file.write(f"New Work: {work}, {work_details[0]}, {work_details[1]}, ")
+                    else:
+                        work_groups_file.write(f"New Group: {work_group_details[0]}, none, ")
 
         if starting_work_time is None:
             starting_work_time = datetime.now()
