@@ -72,25 +72,24 @@ def add_work_parser(previous_works, break_time, work_groups):
 
         separated_text = text.split(sep=",")
         if len(separated_text) == 1:
-            print("Please separate the different sections by a comma.")
-            print(f"Expected Format: '{add_work_parser_details}'")
+            print("Please separate the different sections by a comma next time.")
         else:
-            text_without_spaces_front_and_end = [text.strip() for text in separated_text]
-            for text in text_without_spaces_front_and_end:
-                if ":" in text:
-                    count = 1
-                else:
-                    count = 0
-
-                if "group" in text.lower() and len(text) > 5+count:
-                    group = text.split()[1]
-                elif "work" in text.lower() and len(text) > 4+count:
-                    work = text.split()[1]
-                elif "time" in text.lower() and len(text) > 4+count:
-                    try:
-                        time = int(text.split()[1])
-                    except TypeError:
-                        print("Time excepts integers and is recorded in minutes!")
+            for text in separated_text:
+                if "group" in text:
+                    new_text = text.split("group")[1]
+                    if new_text.strip(":").strip() != "":
+                        group = new_text.strip(":").strip()
+                elif "work" in text:
+                    new_text = text.split("work")[1]
+                    if new_text.strip(":").strip() != "":
+                        work = new_text.strip(":").strip()
+                elif "time" in text:
+                    new_text = text.split("time")[1]
+                    if new_text.strip(":").strip() != "":
+                        try:
+                            time = int(new_text.strip(":").strip())
+                        except TypeError:
+                            time = None
 
         if group is None or work is None or time is None:
             print("Unable to identify the group name, work name, or the time for the work.")
@@ -124,24 +123,23 @@ def add_group_parser(work_groups):
     text = input("Please enter work details: ")
 
     separated_text = text.split(sep=",")
+    separated_text = [text.strip() for text in separated_text]
     if len(separated_text) == 1:
         print("Please separate the different sections by a comma.")
         print(f"Expected Format: {add_group_parser_details}")
     else:
-        text_without_spaces_front_and_end = [text.strip() for text in separated_text]
-        for text in text_without_spaces_front_and_end:
-            if ":" in text:
-                count = 1
-            else:
-                count = 0
-
-            if "group" in text.lower() and len(text) > 5 + count:
-                name = text.split()[1]
-            elif "priority" in text.lower() and len(text) > 8 + count:
-                try:
-                    priority = int(text.split()[1])
-                except TypeError:
-                    print("Priority has to be integer between 1-10!")
+        for text in separated_text:
+            if "group" in text:
+                new_text = text.split("group")[1]
+                if new_text.strip(":").strip() != "":
+                    name = new_text.strip(":").strip()
+            elif "priority" in text:
+                new_text = text.split("priority")[1]
+                if new_text.strip(":").strip() != "":
+                    try:
+                        priority = int(new_text.strip(":").strip())
+                    except TypeError:
+                        priority = None
 
         if name is None or priority is None:
             print("Unable to identify the group name or the priority of the group.")

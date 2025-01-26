@@ -14,7 +14,7 @@ break_time = 10
 work_groups = {}
 # For Testing
 # work_groups = {"A": [5]}
-work_groups = {"A": [5, {"HW": [20, 5], "HW3": [50, 5]}], "B": [9, {"HW2": [30, 5]}], "C": [10]}
+# work_groups = {"A": [5, {"HW": [20, 5], "HW3": [50, 5]}], "B": [9, {"HW2": [30, 5]}], "C": [10]}
 
 # A variable to store previous works, at the end of the code this will be store in a file for future reference
 # Format: [{work, time}, {work, time}]
@@ -22,7 +22,6 @@ previously_added_works = []
 
 
 def print_commands():
-    # TODO figure out how to clear the screen (ask Arnav)
     print("QuickStart:")
     print(f"{APPLICATION_NAME} organizes your daily tasks into various groups with different priorities.")
     print(f"You can add specific works to these groups and {APPLICATION_NAME} will automatically create your schedule.")
@@ -132,11 +131,13 @@ if os.path.isfile("./output_text_files/work_groups.txt"):
 
             works_list = []
             for work in works_str:
-                work_list = [int(work[0])]
+                work_list = [int(work.split(",")[0])]
                 all_works_str = work[3:].split("New Work: ")[1:]
                 if all_works_str:
-                    all_works_str = [text.split(", ")[:len(text.split(", "))-1] for text in all_works_str]
+                    all_works_str = [text.split(", ")[:len(text.split(", "))] for text in all_works_str]
                     for single_work_details in all_works_str:
+                        if "," in single_work_details[-1]:
+                            single_work_details[-1] = single_work_details[-1].split(",")[0]
                         if not len(work_list) > 1:
                             work_list.append({single_work_details[0]: [int(single_work_details[1]),
                                                                        int(single_work_details[2])]})
@@ -152,12 +153,12 @@ if os.path.isfile("./output_text_files/work_groups.txt"):
 
             print("Your previously saved schedule.")
             work_groups = show_schedule(work_groups, starting_work_time, False)
+
 else:
     work_groups_file = open(mode="x", file="./output_text_files/work_groups.txt")
     work_groups_file.close()
 
 while True:
-    # TODO need to add code on checking for new user
     command = input("Please type 'Help' to see what commands you can use: ").lower()
     if check_user_input(command):
         with open(mode="w", file="./output_text_files/default_settings.txt") as default_settings_file:
