@@ -142,8 +142,10 @@ def add_work(work_groups, break_time, group=None, name=None, time_for_work=None)
                         print(f"    {work_number}. {work}, Time: {time} minutes")
 
             # Asks user to choose from list of groups shown
-            group_number = int(input("What work group would you like to add your work to? "
-                                     "(type in # that corresponds): "))
+            group_number = integer_validator(prompt="What work group would you like to add your work to? "
+                                                    "(type in # that corresponds): ",
+                                             minimum=1,
+                                             maximum=work_group_number)
 
             # Takes that number and finds the name of the group
             work_group_number = 0
@@ -255,15 +257,23 @@ def change_default_settings(break_time: int, starting_time: datetime = None) -> 
         print(f"'Break Time' has been changed to {break_time}.")
     elif user_choice == 2:
         change = input("What time do you want to change the starting time to ((0-23):(0-59) or ct for current time)? ")
-        if change.lower() == "ct":
-            starting_time = datetime.now()
-            print("Default Setting changed to current time.")
-        else:
-            hour = int(change.split(sep=":")[0])
-            minute = int(change.split(sep=":")[1])
-            today = datetime.now()
-            starting_time = datetime(year=today.year, month=today.month, day=today.day, hour=hour, minute=minute)
-            print(f"'Starting Time' has been changed to {format_time(starting_time)}.")
+        while True:
+            try:
+                if change.lower() == "ct":
+                    starting_time = datetime.now()
+                    print("Default Setting changed to current time.")
+                else:
+                    hour = int(change.split(sep=":")[0])
+                    minute = int(change.split(sep=":")[1])
+                    today = datetime.now()
+                    starting_time = datetime(year=today.year, month=today.month, day=today.day,
+                                             hour=hour, minute=minute)
+                    print(f"'Starting Time' has been changed to {format_time(starting_time)}.")
+                break
+            except TypeError:
+                print("Please enter the details as required! ((0-23):(0-59) or ct for current time)")
+                change = input(
+                    "What time do you want to change the starting time to ((0-23):(0-59) or ct for current time)? ")
 
     # Asks the user if they want to change something else
     change_again = yes_or_no("Do you want to change another default setting (y/n)? ")
