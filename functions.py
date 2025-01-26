@@ -235,11 +235,12 @@ def print_work_with_time(work, starting_time, minutes):
     return ending_time
 
 
-def change_default_settings(break_time: int, starting_time: datetime = datetime.now()) -> dict:
+def change_default_settings(break_time: int, starting_time: datetime = None) -> dict:
     # Prints the current options
     print(f"1. Break Time: {break_time}")
-    if starting_time.minute == datetime.now().minute:
+    if starting_time is None:
         print(f"2. Starting_Time: Current Time")
+        starting_time = datetime.now()
     else:
         print(f"2. Starting Time: {format_time(starting_time)}")
 
@@ -253,12 +254,16 @@ def change_default_settings(break_time: int, starting_time: datetime = datetime.
         break_time = change
         print(f"'Break Time' has been changed to {break_time}.")
     elif user_choice == 2:
-        change = input("What time do you want to change the starting time to ((0-23):(0-59))? ")
-        hour = int(change.split(sep=":")[0])
-        minute = int(change.split(sep=":")[1])
-        today = datetime.now()
-        starting_time = datetime(year=today.year, month=today.month, day=today.day, hour=hour, minute=minute)
-        print(f"'Starting Time' has been changed to {format_time(starting_time)}.")
+        change = input("What time do you want to change the starting time to ((0-23):(0-59) or ct for current time)? ")
+        if change.lower() == "ct":
+            starting_time = datetime.now()
+            print("Default Setting changed to current time.")
+        else:
+            hour = int(change.split(sep=":")[0])
+            minute = int(change.split(sep=":")[1])
+            today = datetime.now()
+            starting_time = datetime(year=today.year, month=today.month, day=today.day, hour=hour, minute=minute)
+            print(f"'Starting Time' has been changed to {format_time(starting_time)}.")
 
     # Asks the user if they want to change something else
     change_again = yes_or_no("Do you want to change another default setting (y/n)? ")
@@ -298,7 +303,6 @@ def organize_by_priority(work_groups):
         # Goal: Find the work_group with the greatest priority level
         # and store the details of the work_group.
         for key, value in work_groups.items():
-
             # Checks if the priority value of the current group is greater
             # than the priority stored in the priority variable.
             if priority < value[0]:
@@ -345,9 +349,10 @@ def works_exist(work_groups):
         return False
 
 
-def show_schedule(work_groups, starting_time: datetime = None):
+def show_schedule(work_groups, starting_time: datetime = None, use_intro=True):
     if works_exist(work_groups=work_groups):
-        print("Here is your schedule for today.")
+        if use_intro:
+            print("Here is your schedule for today.")
 
         # Sets the starting time to the current time if not provided.
         if starting_time is None:
