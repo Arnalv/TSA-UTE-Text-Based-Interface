@@ -43,7 +43,6 @@ def check_user_input(user_input):
     global break_time
     global starting_work_time
     global previously_added_works
-    print("\n"*4)
     match user_input:
         case "exit":
             return True
@@ -93,22 +92,23 @@ def check_user_input(user_input):
         case "cs":
             work_groups = {}
             print("Schedule has been cleared.")
+    print("\n")
 
 
 try:
-    with open(mode="r", file="./output_text_files/previous_works.txt") as previous_works_file:
+    with open(mode="r", file="./previous_works.txt") as previous_works_file:
         lines = previous_works_file.readlines()
         for line in lines:
             work_name = line.split(sep=", ")[0]
             time = int(line.split(sep=", ")[1].split(sep="\n")[0])
             previously_added_works.append({work_name: time})
 except FileNotFoundError:
-    previous_works_file = open(mode="x", file="./output_text_files/previous_works.txt")
+    previous_works_file = open(mode="x", file="./previous_works.txt")
     previous_works_file.close()
 
-if os.path.isfile("./output_text_files/default_settings.txt"):
-    if os.path.getsize("./output_text_files/default_settings.txt") != 0:
-        with open(mode="r", file="./output_text_files/default_settings.txt") as default_settings_file:
+if os.path.isfile("./default_settings.txt"):
+    if os.path.getsize("./default_settings.txt") != 0:
+        with open(mode="r", file="./default_settings.txt") as default_settings_file:
             starting_work_time = default_settings_file.readline().split(": ")[1].split("\n")[0]
             if starting_work_time == 'None':
                 starting_work_time = None
@@ -120,13 +120,13 @@ if os.path.isfile("./output_text_files/default_settings.txt"):
                                               hour=starting_work_time[0], minute=starting_work_time[1])
             break_time = int(default_settings_file.readline().split(": ")[1].split("\n")[0])
 else:
-    default_settings_file = open(mode="x", file="./output_text_files/default_settings.txt")
+    default_settings_file = open(mode="x", file="./default_settings.txt")
     default_settings_file.close()
 
-if os.path.isfile("./output_text_files/work_groups.txt"):
+if os.path.isfile("./work_groups.txt"):
     # Formatted like {work_group_name: [priority, {work_name : [time_for_work, break_time]}]}
-    with open(mode="r", file="./output_text_files/work_groups.txt") as work_groups_file:
-        if os.path.getsize("./output_text_files/work_groups.txt") != 0:
+    with open(mode="r", file="./work_groups.txt") as work_groups_file:
+        if os.path.getsize("./work_groups.txt") != 0:
             work_groups_str = work_groups_file.readline().strip().split(sep="Work Groups: ")[1].split()
             works_str = work_groups_file.readline().strip().split("Corresponding Works: ")[1].split("New Group: ")[1:]
 
@@ -156,21 +156,21 @@ if os.path.isfile("./output_text_files/work_groups.txt"):
             work_groups = show_schedule(work_groups, starting_work_time, False)
 
 else:
-    work_groups_file = open(mode="x", file="./output_text_files/work_groups.txt")
+    work_groups_file = open(mode="x", file="./work_groups.txt")
     work_groups_file.close()
 
 while True:
     command = input("Please type 'Help' to see what commands you can use: ").lower()
     if check_user_input(command):
-        with open(mode="w", file="./output_text_files/default_settings.txt") as default_settings_file:
+        with open(mode="w", file="./default_settings.txt") as default_settings_file:
             default_settings_file.write(f"starting_work_time: {starting_work_time}\n"
                                         f"break_time: {break_time}")
-        with open(mode="w", file="./output_text_files/previous_works.txt") as previous_works_file:
+        with open(mode="w", file="./previous_works.txt") as previous_works_file:
             for work in previously_added_works:
                 for work_name, time in work.items():
                     previous_works_file.write(f"{work_name}, {time}\n")
 
-        with open(mode="w", file="./output_text_files/work_groups.txt") as work_groups_file:
+        with open(mode="w", file="./work_groups.txt") as work_groups_file:
             if work_groups:
                 work_groups_file.write("Work Groups: ")
                 for work_group in work_groups:
@@ -188,7 +188,7 @@ while True:
         if starting_work_time is None:
             starting_work_time = datetime.now()
 
-        with open(mode="w", file="./output_text_files/schedule.txt") as schedule_file:
+        with open(mode="w", file="./schedule.txt") as schedule_file:
             write_lines = ["Here is your schedule for today.\n"]
 
             # Calls the update schedule function which organizes the works by their priority in the
