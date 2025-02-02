@@ -43,6 +43,7 @@ def check_user_input(user_input):
     global break_time
     global starting_work_time
     global previously_added_works
+    print("\n"*4)
     match user_input:
         case "exit":
             return True
