@@ -33,7 +33,7 @@ def print_commands():
           "'remove group' or 'rg': Removes a group\n"
           "'change default settings' or 'ch_d': Changes default settings\n"
           "'change schedule' or 'ch_s': Edits specific break times or work times in the schedule\n"
-          "'clear schedule' or 'cs': Clears your entire schedule\n"
+          "'clear' or 'c': Clears your entire schedule\n"
           "'show schedule' or 's': Shows completed schedule\n"
           "'exit': Exits application")
 
@@ -86,10 +86,10 @@ def check_user_input(user_input):
             work_groups = change_schedule(work_groups, starting_work_time)
         case "ch_s":
             work_groups = change_schedule(work_groups, starting_work_time)
-        case "clear schedule":
-            work_groups = {}
+        case "clear":
+            work_groups = {}    
             print("Schedule has been cleared.")
-        case "cs":
+        case "c":
             work_groups = {}
             print("Schedule has been cleared.")
     print("\n")
