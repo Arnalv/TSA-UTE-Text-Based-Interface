@@ -1,2 +1,0 @@
-starting_work_time: None
-break_time: 10

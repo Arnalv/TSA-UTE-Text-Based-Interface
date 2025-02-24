@@ -469,3 +469,49 @@ def change_schedule(work_groups, starting_time=None):
 
     # Returns items
     return work_groups
+
+
+def add_previous_work(work_groups, previous_works, break_time):
+
+    if previous_works:
+        work = None
+        time = None
+
+        # Displays to the user the options
+        count = 0
+        for work in previous_works:
+            count += 1
+            print(f"{count}. {work}")
+
+        # Asks user about their choice
+        user_choice = int(input("Which previously added work do you want to add? "))
+
+        # Updates the values accordingly
+        for work_name, time in previous_works[user_choice - 1].items():
+            # Updates the name
+            work = work_name
+            # Asks the user if they want to change the time of the given work
+            user_choice = yes_or_no(
+                prompt="Do you want to change the amount of time this work takes (y/n)? "
+            )
+            if user_choice == "y":
+                new_time = int(input("What do you want to change the time to? "))
+            else:
+                new_time = time
+            # Updates the time
+            time = new_time
+
+        if check_duplicate(work_groups=work_groups, work_name=work):
+            print("A work already exists with a name as this previous work.")
+            print("The previous work has not been added.")
+            return work_groups
+        else:
+            group = input("What group do want to enter this work to? ")
+
+        work_groups = add_work(work_groups=work_groups, break_time=break_time, group=group, name=work,
+                               time_for_work=time)
+    else:
+        print("There are no previous works add.")
+        print("When you use 'add work' or 'a', that work will be saved into your previous work.")
+
+    return work_groups
