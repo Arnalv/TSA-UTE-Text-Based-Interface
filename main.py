@@ -53,12 +53,14 @@ def check_user_input(user_input):
         case "ag":
             work_groups = add_group_parser(work_groups)
         case "add work":
-            return_items = add_work_parser(previous_works=previously_added_works, break_time=5, work_groups=work_groups)
+            return_items = add_work_parser(previous_works=previously_added_works, break_time=break_time,
+                                           work_groups=work_groups)
 
             work_groups = return_items["work_groups"]
             previously_added_works = return_items["previously_added_works"]
         case "a":
-            return_items = add_work_parser(previous_works=previously_added_works, break_time=5, work_groups=work_groups)
+            return_items = add_work_parser(previous_works=previously_added_works, break_time=break_time,
+                                           work_groups=work_groups)
 
             work_groups = return_items["work_groups"]
             previously_added_works = return_items["previously_added_works"]
@@ -92,6 +94,14 @@ def check_user_input(user_input):
         case "c":
             work_groups = {}
             print("Schedule has been cleared.")
+        case "add_previous_work":
+            work_groups = add_previous_work(work_groups=work_groups, previous_works=previously_added_works,
+                                            break_time=break_time)
+        case "ap":
+            work_groups = add_previous_work(work_groups=work_groups, previous_works=previously_added_works,
+                                            break_time=break_time)
+
+    print("\n")
 
 
 try:
@@ -225,3 +235,5 @@ while True:
 
             schedule_file.writelines(write_lines)
         break
+
+# Hello world4
