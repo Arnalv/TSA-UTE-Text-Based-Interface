@@ -1,6 +1,7 @@
 from text_parser import *
 import os
 from functions import *
+from termcolor import colored
 
 APPLICATION_NAME = "AutoSchedule"
 
@@ -20,22 +21,35 @@ work_groups = {}
 # Format: [{work, time}, {work, time}]
 previously_added_works = []
 
+command_color = "green"
+
 
 def print_commands():
     print("QuickStart:")
     print(f"{APPLICATION_NAME} organizes your daily tasks into various groups with different priorities.")
     print(f"You can add specific works to these groups and {APPLICATION_NAME} will automatically create your schedule.")
-    print("To get started use 'add group' to create your first group and 'add work' to add your first work.\n")
-    print("Here are a full list of commands with descriptions:\n"
-          "'add work' or 'a': Adds a work to a group\n"
-          "'add group' or 'ag': Adds a new group\n"
-          "'remove work' or 'r': Removes a work from a group depending\n"
-          "'remove group' or 'rg': Removes a group\n"
-          "'change default settings' or 'ch_d': Changes default settings\n"
-          "'change schedule' or 'ch_s': Edits specific break times or work times in the schedule\n"
-          "'clear' or 'c': Clears your entire schedule\n"
-          "'show schedule' or 's': Shows completed schedule\n"
-          "'exit': Exits application")
+    print(f"To get started use '{colored("add group", command_color)}' to create your first group and "
+          f"'{colored("add group", command_color)}' to add your first work.\n")
+    print(f"Here are a full list of commands with descriptions:\n"
+          f"'{colored("add work", command_color)}' or '{colored("a", command_color)}': "
+          f"Adds a work to a group\n"
+          f"'{colored("add previous work", command_color)}' or '{colored("ap", command_color)}': "
+          f"Allows you to add a previously added work.\n"
+          f"'{colored("add group", command_color)}' or '{colored("ag", command_color)}': "
+          f"Adds a new group\n"
+          f"'{colored("remove work", command_color)}' or '{colored("r", command_color)}': "
+          f"Removes a work from a group depending\n"
+          f"'{colored("remove group", command_color)}' or '{colored("rg", command_color)}': Removes a group\n"
+          f"'{colored("change default settings", command_color)}' or '{colored("ch_d", command_color)}': "
+          f"Changes default settings\n"
+          f"'{colored("change schedule", command_color)}' or '{colored("ch_s", command_color)}': "
+          f"Edits specific break times or work times in the schedule\n"
+          f"'{colored("clear", command_color)}' or '{colored("c", command_color)}': "
+          f"Clears your entire schedule\n"
+          f"'{colored("show schedule", command_color)}' or '{colored("s", command_color)}': "
+          f"Shows completed schedule\n"
+          f"'{colored("exit", command_color)}': "
+          f"Exits application")
 
 
 def check_user_input(user_input):
@@ -89,12 +103,12 @@ def check_user_input(user_input):
         case "ch_s":
             work_groups = change_schedule(work_groups, starting_work_time)
         case "clear":
-            work_groups = {}    
+            work_groups = {}
             print("Schedule has been cleared.")
         case "c":
             work_groups = {}
             print("Schedule has been cleared.")
-        case "add_previous_work":
+        case "add previous work":
             work_groups = add_previous_work(work_groups=work_groups, previous_works=previously_added_works,
                                             break_time=break_time)
         case "ap":
@@ -169,7 +183,7 @@ else:
     work_groups_file.close()
 
 while True:
-    command = input("Please type 'Help' to see what commands you can use: ").lower()
+    command = input("Please type 'Help' to see what commands you can use: ").lower().strip()
     if check_user_input(command):
         with open(mode="w", file="./output_text_files/default_settings.txt") as default_settings_file:
             default_settings_file.write(f"starting_work_time: {starting_work_time}\n"
@@ -235,5 +249,3 @@ while True:
 
             schedule_file.writelines(write_lines)
         break
-
-# Hello world5

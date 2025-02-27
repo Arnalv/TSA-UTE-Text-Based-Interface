@@ -1,12 +1,29 @@
 from functions import *
 
+# General Colors
+WARNING_COLOR = "red"
+INSTRUCTIONS_COLOR = "cyan"
+SUCCESS_COLOR = "green"
+
+# Schedule Printing Colors
+WORK_COLOR = "blue"
+BREAK_TIME_COLOR = "yellow"
+
+# Work groups color
+WORK_GROUPS_COLOR = "magenta"
+
+# Commands Color
+command_color = "green"
+
 # Text Parser Variables
 
 # add_work_parser(text="group: group1, work: work1, time: 10", previous_works=None, break_time=5, work_groups=)
-add_work_parser_details = "g: group_name, w: work_name, t: time_in_minutes"
+add_work_parser_details = (f"g: {colored("group_name", WORK_GROUPS_COLOR)}, w: {colored("work_name", WORK_COLOR)}"
+                           f", t: {colored("time_in_minutes", INSTRUCTIONS_COLOR)}")
 
 # add_group(original_work_groups=work_groups, group_name=name, group_priority=priority)
-add_group_parser_details = "g: group_name, p: priority(1-10)"
+add_group_parser_details = (f"g: {colored("group_name", WORK_GROUPS_COLOR)}, "
+                            f"p: {colored("priority(1-10)", INSTRUCTIONS_COLOR)}")
 
 
 def add_work_parser(previous_works, break_time, work_groups):
@@ -20,13 +37,13 @@ def add_work_parser(previous_works, break_time, work_groups):
     time = None
 
     # Gets details from user about work details, if they don't want to add a previously added work
-    print(f"Format for best results (g = group, w = work_name, t = time): "
+    print(f"Format for best results {colored("(g = group, w = work_name, t = time)", INSTRUCTIONS_COLOR)}: "
           f"{add_work_parser_details}")
-    text = input("Please enter work details: ")
+    text = input(f"Please enter {colored("work details", INSTRUCTIONS_COLOR)}: ")
 
     separated_text = text.split(sep=",")
     if len(separated_text) == 1:
-        print("Please separate the different sections by a comma next time.")
+        cprint("Please separate the different sections by a comma next time.", WARNING_COLOR)
     else:
         for text in separated_text:
             if "g" in text:
@@ -85,12 +102,12 @@ def add_group_parser(work_groups):
     priority = None
 
     print(f"Format for best results: {add_group_parser_details}")
-    text = input("Please enter work details: ")
+    text = input(f"Please enter {colored("work details", INSTRUCTIONS_COLOR)}: ")
 
     separated_text = text.split(sep=",")
     separated_text = [text.strip() for text in separated_text]
     if len(separated_text) == 1:
-        print("Please separate the different sections by a comma.")
+        cprint("Please separate the different sections by a comma.", WARNING_COLOR)
         print(f"Expected Format: {add_group_parser_details}")
     else:
         for text in separated_text:
