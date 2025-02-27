@@ -296,11 +296,10 @@ def change_default_settings(break_time: int, starting_time: datetime = None) -> 
 
     # Updates the corresponding values with user inputs
     if user_choice == 1:
-        integer_validator(
+        change = integer_validator(
             prompt=f"What would you like to change the "
                    f"{colored("default break time", INSTRUCTIONS_COLOR)} to (minutes)? ",
             minimum=0)
-        change = int(input())
         break_time = change
         print(f"'Break Time' has been changed to {break_time}.")
     elif user_choice == 2:
@@ -321,6 +320,11 @@ def change_default_settings(break_time: int, starting_time: datetime = None) -> 
                     cprint(f"'Starting Time' has been changed to {format_time(starting_time)}.", SUCCESS_COLOR)
                 break
             except TypeError:
+                cprint("Please enter the details as required! ((0-23):(0-59) or ct for current time)", WARNING_COLOR)
+                change = input(
+                    f"What time do you want to change the starting time to "
+                    f"{colored("((0-23):(0-59) or ct for current time)", INSTRUCTIONS_COLOR)}? ")
+            except ValueError:
                 cprint("Please enter the details as required! ((0-23):(0-59) or ct for current time)", WARNING_COLOR)
                 change = input(
                     f"What time do you want to change the starting time to "

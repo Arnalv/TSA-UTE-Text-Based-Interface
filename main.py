@@ -1,7 +1,7 @@
 from text_parser import *
 import os
 from functions import *
-from termcolor import colored
+from termcolor import colored, cprint
 
 APPLICATION_NAME = "AutoSchedule"
 
@@ -22,6 +22,7 @@ work_groups = {}
 previously_added_works = []
 
 command_color = "green"
+SUCCESS_COLOR = "green"
 
 
 def print_commands():
@@ -104,10 +105,10 @@ def check_user_input(user_input):
             work_groups = change_schedule(work_groups, starting_work_time)
         case "clear":
             work_groups = {}
-            print("Schedule has been cleared.")
+            cprint("Schedule has been cleared.", SUCCESS_COLOR)
         case "c":
             work_groups = {}
-            print("Schedule has been cleared.")
+            cprint("Schedule has been cleared.", SUCCESS_COLOR)
         case "add previous work":
             work_groups = add_previous_work(work_groups=work_groups, previous_works=previously_added_works,
                                             break_time=break_time)
