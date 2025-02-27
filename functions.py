@@ -1,5 +1,21 @@
 from datetime import datetime, timedelta
 from input_validation import *
+from termcolor import cprint, colored
+
+# General Colors
+WARNING_COLOR = "red"
+INSTRUCTIONS_COLOR = "cyan"
+SUCCESS_COLOR = "green"
+
+# Schedule Printing Colors
+WORK_COLOR = "blue"
+BREAK_TIME_COLOR = "yellow"
+
+# Work groups color
+WORK_GROUPS_COLOR = "magenta"
+
+# Commands Color
+command_color = "green"
 
 
 def show_options(work_groups):
@@ -8,12 +24,12 @@ def show_options(work_groups):
     for group, work_section in work_groups.items():
         work_list = [group]
         group_count += 1
-        print(f"{group_count}. {group}")
+        print(f"{group_count}. {colored(group, WORK_GROUPS_COLOR)}")
         work_count = 0
         if len(work_groups[group]) != 1:
             for work, time in work_section[1].items():
                 work_count += 1
-                print(f"    {work_count}. {work}, time:   {time[0]} min")
+                print(f"    {work_count}. {colored(work, WORK_COLOR)}, time: {time[0]} min")
                 work_list.append(work)
         work_groups_list.append(work_list)
 
@@ -32,7 +48,9 @@ def remove_group(work_groups: dict, removing_group=None) -> dict:
             work_groups_list = show_options(work_groups)
             length = len(work_groups)
             group_access_integer = integer_validator(
-                prompt="Enter the number corresponding to the group you want to remove: ",
+                prompt=f"Enter the {colored("number", INSTRUCTIONS_COLOR)} corresponding to the "
+                       f"{colored("group", INSTRUCTIONS_COLOR)} you want "
+                       f"to remove: ",
                 minimum=1,
                 maximum=length) - 1
             group_key = work_groups_list[group_access_integer][0]
@@ -41,7 +59,12 @@ def remove_group(work_groups: dict, removing_group=None) -> dict:
         # Removes the group
         del work_groups[group_key]
         # Prints confirmation message to user
-        print(f"The group '{group_key}' has been removed.")
+        print(f"The group '{colored(group_key, INSTRUCTIONS_COLOR)}' has been removed.")
+    else:
+        cprint("There are no groups to remove.", WARNING_COLOR)
+        cprint(f"{colored("To add a group use '", WARNING_COLOR)}"
+               f"{colored("add group", command_color)}"
+               f"{colored("'.", WARNING_COLOR)}")
 
     # Returns the updated work_groups
     return work_groups
@@ -54,19 +77,24 @@ def remove_work(work_groups: dict, removing_work: list = None) -> dict:
 
             length = len(work_groups_list)
             group_access_integer = integer_validator(
-                prompt="Enter the number corresponding to the group of the work you want to remove: ",
+                prompt=f"Enter the colored {colored("number", INSTRUCTIONS_COLOR)} corresponding to the group of the "
+                       f"{colored("work", INSTRUCTIONS_COLOR)} you want to remove: ",
                 minimum=1,
                 maximum=length) - 1
 
             group_key = work_groups_list[group_access_integer][0]
             if len(work_groups_list[group_access_integer]) == 1:
-                print("There are no works to remove in this work group.")
-                print("If you want to remove the group, use remove_group.")
+                cprint("There are no works to remove in this work group.", WARNING_COLOR)
+                print(f"{colored("If you want to remove the group, use '", WARNING_COLOR)}"
+                      f"{colored("remove group", command_color)}"
+                      f"{colored("'.", WARNING_COLOR)}")
                 return work_groups
             else:
                 length = len(work_groups_list[group_access_integer]) - 1
                 work_access_integer = integer_validator(
-                    prompt="Enter the number corresponding to the work you want to remove: ",
+                    prompt=f"Enter the {colored("number", INSTRUCTIONS_COLOR)} corresponding to the "
+                           f"{colored("work", INSTRUCTIONS_COLOR)} you "
+                           f"want to remove: ",
                     minimum=1,
                     maximum=length)
 
@@ -76,10 +104,18 @@ def remove_work(work_groups: dict, removing_work: list = None) -> dict:
             work_key = removing_work[1]
 
         del work_groups[group_key][1][work_key]
-        print(f"The work '{work_key}' has been removed from the group '{group_key}'.")
+        print(f"{colored("The work '", SUCCESS_COLOR)}"
+              f"{colored(work_key, WORK_COLOR)}"
+              f"{colored("' has been removed from the group '", SUCCESS_COLOR)}"
+              f"{colored(group_key, WORK_GROUPS_COLOR)}"
+              f"{colored("'.", SUCCESS_COLOR)}")
     else:
-        print("There are no works added to remove.")
-        print("First add a group using add_group and then use add_work to add a work to the group.")
+        cprint(f"There are no works added to remove.", WARNING_COLOR)
+        print(f"{colored("First add a group using ", WARNING_COLOR)}"
+              f"{colored("add group", command_color)}"
+              f"{colored(" and then use ", WARNING_COLOR)}"
+              f"{colored("add work", command_color)}"
+              f"{colored(" to add a work to the group.", WARNING_COLOR)}")
     return work_groups
 
 
@@ -88,23 +124,26 @@ def add_group(original_work_groups, group_name=None, group_priority=None):
 
     # Takes input from the user if not provided in the function
     if group_name is None:
-        group_name = input("Name of group: ")
+        group_name = input(f"Name of {colored("group", INSTRUCTIONS_COLOR)}: ")
 
     if group_priority is None:
         while True:
             try:
-                group_priority = int(input("What priority level would you like " + group_name + " to have? (1-10) "))
+                group_priority = int(input(f"What {colored("priority level", INSTRUCTIONS_COLOR)} would you like "
+                                           f"'{colored(group_name, WORK_GROUPS_COLOR)}' to have? (1-10) "))
                 if 1 <= group_priority <= 10:
                     break
             except TypeError:
-                print("Please enter an integer between 1 and 10!")
+                cprint("Please enter an integer between 1 and 10!", WARNING_COLOR)
 
     # Adds the work group, if it already doesn't exist
     if group_name not in work_groups:
         work_groups[group_name] = [group_priority]
-        print(f"Work Group '{group_name}' has been added.")
+        print(f"{colored("Work Group '", SUCCESS_COLOR)}"
+              f"{colored(group_name, WORK_GROUPS_COLOR)}"
+              f"{colored("' has been added.", SUCCESS_COLOR)}")
     else:
-        print("Work group already exists!")
+        cprint("Work group already exists!", WARNING_COLOR)
 
     return work_groups
 
@@ -134,16 +173,16 @@ def add_work(work_groups, break_time, group=None, name=None, time_for_work=None)
             work_group_number = 0
             for key, value in work_groups.items():
                 work_group_number += 1
-                print(f"{work_group_number}. {key} (Priority: {value[0]})")
+                print(f"{work_group_number}. {colored(key, WORK_GROUPS_COLOR)} (Priority: {value[0]})")
                 work_number = 0
                 if len(value) > 1:
                     for work, time in value[1].items():
                         work_number += 1
-                        print(f"    {work_number}. {work}, Time: {time} minutes")
+                        print(f"    {work_number}. {colored(work, WORK_COLOR)}, Time: {time} minutes")
 
             # Asks user to choose from list of groups shown
-            group_number = integer_validator(prompt="What work group would you like to add your work to? "
-                                                    "(type in # that corresponds): ",
+            group_number = integer_validator(prompt=f"What work group would you like to add your work to? "
+                                                    f"{colored("(type in # that corresponds): ", INSTRUCTIONS_COLOR)}",
                                              minimum=1,
                                              maximum=work_group_number)
 
@@ -157,38 +196,42 @@ def add_work(work_groups, break_time, group=None, name=None, time_for_work=None)
 
         # Tells the user that there are no work groups present, and you can't add a work
         else:
-            # print("No work groups detected.")
-            group = input("Group Name: ")
-        # print("You will need to add a work group first using 'add_group' or provide name of the group when asked.")
+            group = input(f"{colored("Group", INSTRUCTIONS_COLOR)} name: ")
 
     # Checks if the name of the group is not provided and gets an input from the user if not provided
     if name is None:
         # Just asks the user a name due to the user not looking through the previous list
-        name = input("Please enter a name for this work: ")
+        name = input(f"Please enter {colored("a name", INSTRUCTIONS_COLOR)} for this work: ")
 
     # check if the name provided is duplicate name
     if check_duplicate(work_groups=work_groups, work_name=name):
-        print("The name of the work already exists.")
-        new_name = input("Please enter another name for the work: ")
+        cprint("The name of the work already exists.", WARNING_COLOR)
+        new_name = input(f"Please enter another {colored("name", INSTRUCTIONS_COLOR)} for the work: ")
         while name == new_name:
-            print("That name was the same one as the previous name.")
+            cprint("That name was the same one as the previous name.", WARNING_COLOR)
             new_name = input("Please enter a new name: ")
         name = new_name
 
     # Asks the user for the time of the work if not already provided
     if time_for_work is None:
-        time_for_work = int(input("About how many minutes that does this work take? "))
+        time_for_work = integer_validator(
+            prompt=f"About how many {colored("minutes", INSTRUCTIONS_COLOR)} that does this work take?", minimum=1)
 
     # Checks if a provided group is not in work_groups
     if group not in work_groups:
-        group_response = yes_or_no(f"Group not found. Would you like to add a group called '{group}' (y/n)? ")
+        group_response = yes_or_no(f"Group not found. Would you like to add a group called "
+                                   f"'{colored(group, INSTRUCTIONS_COLOR)}' (y/n)? ")
         if group_response == "y":
             # Adds the group
             work_groups = add_group(group_name=group, original_work_groups=work_groups)
         else:
-            print("Adding work to schedule not successful. Make sure the work you intended to add has a valid "
-                  "work group (spelled correctly).")
-            print("If work group is not created yet, please type 'add_group' to create one.")
+            cprint("Adding work to schedule not successful. Make sure the work you intended to add has a valid "
+                   "work group (spelled correctly).", WARNING_COLOR)
+            print(f"{colored("If work group is not created yet, please type '", WARNING_COLOR)}"
+                  f"{colored("add group", command_color)}"
+                  f"{colored("' or '", WARNING_COLOR)}"
+                  f"{colored("ag", command_color)}"
+                  f"{colored("' to create one.", WARNING_COLOR)}")
             return work_groups
 
     # Add the work to the work group
@@ -198,7 +241,7 @@ def add_work(work_groups, break_time, group=None, name=None, time_for_work=None)
     else:
         work_groups[group][1][name] = [time_for_work, break_time]
 
-    print(f"Work '{name}' has been added to the work group '{group}'.")
+    print(f"Work '{colored(name, WORK_COLOR)}' has been added to the work group '{colored(group, WORK_GROUPS_COLOR)}'.")
 
     # Returns the items
     return work_groups
@@ -239,44 +282,52 @@ def print_work_with_time(work, starting_time, minutes):
 
 def change_default_settings(break_time: int, starting_time: datetime = None) -> dict:
     # Prints the current options
-    print(f"1. Break Time: {break_time}")
+    print(f"1. {colored("Break Time", BREAK_TIME_COLOR)}: {break_time}")
     if starting_time is None:
-        print(f"2. Starting_Time: Current Time")
+        print(f"2. {colored("Starting Time", WORK_GROUPS_COLOR)}: Current Time")
         starting_time = datetime.now()
     else:
-        print(f"2. Starting Time: {format_time(starting_time)}")
+        print(f"2. {colored("Starting Time", WORK_GROUPS_COLOR)}: {format_time(starting_time)}")
 
     # Asks the user to choose
-    user_choice = integer_validator(prompt="Choose the number corresponding to the setting you want to change (1-2): ",
+    user_choice = integer_validator(prompt=f"Choose the {colored("number", INSTRUCTIONS_COLOR)} "
+                                           f"corresponding to the setting you want to change (1-2): ",
                                     minimum=1, maximum=2)
 
     # Updates the corresponding values with user inputs
     if user_choice == 1:
-        change = int(input("What would you like to change the default break time to (minutes)? "))
+        integer_validator(
+            prompt=f"What would you like to change the "
+                   f"{colored("default break time", INSTRUCTIONS_COLOR)} to (minutes)? ",
+            minimum=0)
+        change = int(input())
         break_time = change
         print(f"'Break Time' has been changed to {break_time}.")
     elif user_choice == 2:
-        change = input("What time do you want to change the starting time to ((0-23):(0-59) or ct for current time)? ")
+        change = input(
+            f"What time do you want to change the starting time to "
+            f"{colored("((0-23):(0-59) or ct for current time)", INSTRUCTIONS_COLOR)}? ")
         while True:
             try:
                 if change.lower() == "ct":
                     starting_time = datetime.now()
-                    print("Default Setting changed to current time.")
+                    cprint("Default Setting changed to current time.", SUCCESS_COLOR)
                 else:
                     hour = int(change.split(sep=":")[0])
                     minute = int(change.split(sep=":")[1])
                     today = datetime.now()
                     starting_time = datetime(year=today.year, month=today.month, day=today.day,
                                              hour=hour, minute=minute)
-                    print(f"'Starting Time' has been changed to {format_time(starting_time)}.")
+                    cprint(f"'Starting Time' has been changed to {format_time(starting_time)}.", SUCCESS_COLOR)
                 break
             except TypeError:
-                print("Please enter the details as required! ((0-23):(0-59) or ct for current time)")
+                cprint("Please enter the details as required! ((0-23):(0-59) or ct for current time)", WARNING_COLOR)
                 change = input(
-                    "What time do you want to change the starting time to ((0-23):(0-59) or ct for current time)? ")
+                    f"What time do you want to change the starting time to "
+                    f"{colored("((0-23):(0-59) or ct for current time)", INSTRUCTIONS_COLOR)}? ")
 
     # Asks the user if they want to change something else
-    change_again = yes_or_no("Do you want to change another default setting (y/n)? ")
+    change_again = yes_or_no(f"Do you want to {colored("change another default setting", INSTRUCTIONS_COLOR)} (y/n)? ")
 
     # Does recursion if true
     if change_again == "y":
@@ -362,7 +413,7 @@ def works_exist(work_groups):
 def show_schedule(work_groups, starting_time: datetime = None, use_intro=True):
     if works_exist(work_groups=work_groups):
         if use_intro:
-            print("Here is your schedule for today.")
+            cprint("Here is your schedule for today.", INSTRUCTIONS_COLOR)
 
         # Sets the starting time to the current time if not provided.
         if starting_time is None:
@@ -381,15 +432,17 @@ def show_schedule(work_groups, starting_time: datetime = None, use_intro=True):
         # Prints the schedule in 'Work_Name: Start-Time -- End-Time' format
         for work_name, work_details in priority_ordered_schedule.items():
             # Prints the work timings
-            starting_time = print_work_with_time(work_name, starting_time, work_details[0])
+            starting_time = print_work_with_time(colored(work_name, WORK_COLOR),
+                                                 starting_time, work_details[0])
             # Blank line for spacing
             print("")
             # Prints break time timings
-            starting_time = print_work_with_time("BREAK TIME", starting_time, work_details[1])
+            starting_time = print_work_with_time(colored("BREAK TIME", BREAK_TIME_COLOR), starting_time,
+                                                 work_details[1])
             # Blank line for spacing
             print("")
     else:
-        print("There are no works added. Use 'add work' to add a work.")
+        cprint("There are no works added. Use 'add work' to add a work.", WARNING_COLOR)
 
     # Returns the items
     return work_groups
@@ -416,7 +469,7 @@ def change_schedule(work_groups, starting_time=None):
             # Prints the work timings
             count += 1
             print(f"{count}. ", end="")
-            starting_time = print_work_with_time(work_name, starting_time, work_details[0])
+            starting_time = print_work_with_time(colored(work_name, WORK_COLOR), starting_time, work_details[0])
             print(f"Time: {work_details[0]} minutes")
             work_dict_including_break[work_name] = work_details[0]
             # Blank line for spacing
@@ -424,7 +477,8 @@ def change_schedule(work_groups, starting_time=None):
             # Prints break time timings
             count += 1
             print(f"{count}. ", end="")
-            starting_time = print_work_with_time("BREAK TIME", starting_time, work_details[1])
+            starting_time = print_work_with_time(colored("BREAK TIME", BREAK_TIME_COLOR), starting_time,
+                                                 work_details[1])
             print(f"Time: {work_details[1]} minutes")
             work_dict_including_break[f"break_time{count}"] = work_details[1]
             # Blank line for spacing
@@ -442,7 +496,8 @@ def change_schedule(work_groups, starting_time=None):
             if count % 2 == 1:
                 before_break_work_name = work_name
             if count == user_choice:
-                time_change = int(input("What would you like to change the time to (minutes)? "))
+                time_change = integer_validator(prompt=f"What would you like to change the "
+                                                       f"{colored("time", INSTRUCTIONS_COLOR)} to (minutes)? ")
                 for work_group, works in work_groups.items():
                     if len(works) > 1:
                         for actual_work_name, work_details in works[1].items():
@@ -453,19 +508,19 @@ def change_schedule(work_groups, starting_time=None):
                                     work_groups[work_group][1][actual_work_name][0] = time_change
 
         # Prints that the change has been successful
-        print("Change has been successful.")
+        cprint("Change has been successful.", SUCCESS_COLOR)
 
         # Asks the user if they want to change another item in the schedule
-        change_again = yes_or_no("Do you want to change something else (y/n)? ")
+        change_again = yes_or_no(f"Do you want to {colored("change", INSTRUCTIONS_COLOR)} something else (y/n)? ")
 
         # Checks the answer and does recursion
         if change_again == "y":
             return_items = change_schedule(work_groups, original_starting_time)
             work_groups = return_items["work_groups"]
     else:
-        print("Current schedule doesn't contain anything to change.")
-        print("To add a group, use 'add group'.")
-        print("To add a work, use 'add work'.")
+        cprint("Current schedule doesn't contain anything to change.", WARNING_COLOR)
+        print(f"To add a group, use '{colored("add group", command_color)}'.")
+        print(f"To add a work, use '{colored("add work", command_color)}'.")
 
     # Returns items
     return work_groups
@@ -481,37 +536,41 @@ def add_previous_work(work_groups, previous_works, break_time):
         count = 0
         for work in previous_works:
             count += 1
-            print(f"{count}. {work}")
+            print(f"{count}. {colored("work", WORK_COLOR)}")
 
         # Asks user about their choice
-        user_choice = int(input("Which previously added work do you want to add? "))
+        user_choice = integer_validator(
+            prompt=f"Which {colored("previously added work", INSTRUCTIONS_COLOR)} do you want to add? ",
+            minimum=0, maximum=count)
 
         # Updates the values accordingly
         for work_name, time in previous_works[user_choice - 1].items():
             # Updates the name
             work = work_name
             # Asks the user if they want to change the time of the given work
-            user_choice = yes_or_no(
-                prompt="Do you want to change the amount of time this work takes (y/n)? "
-            )
+            user_choice = yes_or_no(prompt=f"Do you want to change the "
+                                           f"{colored("amount of time", INSTRUCTIONS_COLOR)} this work takes (y/n)? ")
             if user_choice == "y":
-                new_time = int(input("What do you want to change the time to? "))
+                new_time = integer_validator(prompt=f"What do you want to change the "
+                                                    f"{colored("time", INSTRUCTIONS_COLOR)} to? ")
             else:
                 new_time = time
             # Updates the time
             time = new_time
 
         if check_duplicate(work_groups=work_groups, work_name=work):
-            print("A work already exists with a name as this previous work.")
-            print("The previous work has not been added.")
+            cprint("A work already exists with a name as this previous work.", WARNING_COLOR)
+            cprint("The previous work has not been added.", WARNING_COLOR)
             return work_groups
         else:
-            group = input("What group do want to enter this work to? ")
+            group = input(f"What {colored("group", INSTRUCTIONS_COLOR)} do want to enter this "
+                          f"{colored("work", INSTRUCTIONS_COLOR)} to? ")
 
         work_groups = add_work(work_groups=work_groups, break_time=break_time, group=group, name=work,
                                time_for_work=time)
     else:
-        print("There are no previous works add.")
-        print("When you use 'add work' or 'a', that work will be saved into your previous work.")
+        cprint("There are no previous works add.", WARNING_COLOR)
+        print(f"When you use '{colored("add work", command_color)}' or '{colored("a", command_color)}', "
+              f"that work will be {colored("saved into your previous work.", INSTRUCTIONS_COLOR)}")
 
     return work_groups
