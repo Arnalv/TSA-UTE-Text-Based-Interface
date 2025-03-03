@@ -1,4 +1,5 @@
 from functions import *
+from text_manager import *
 
 # General Colors
 WARNING_COLOR = "red"
@@ -37,13 +38,15 @@ def add_work_parser(previous_works, break_time, work_groups):
     time = None
 
     # Gets details from user about work details, if they don't want to add a previously added work
-    print(f"Format for best results {colored("(g = group, w = work_name, t = time)", INSTRUCTIONS_COLOR)}: "
-          f"{add_work_parser_details}")
+    update_append(f"Format for best results "
+                             f"{colored("(g = group, w = work_name, t = time)", INSTRUCTIONS_COLOR)}: "
+                             f"{add_work_parser_details}")
     text = input(f"Please enter {colored("work details", INSTRUCTIONS_COLOR)}: ")
+    update_append(f"Please enter {colored("work details", INSTRUCTIONS_COLOR)}: {text}")
 
     separated_text = text.split(sep=",")
     if len(separated_text) == 1:
-        cprint("Please separate the different sections by a comma next time.", WARNING_COLOR)
+        update_append(colored("Please separate the different sections by a comma next time.", WARNING_COLOR))
     else:
         for text in separated_text:
             if "g" in text:
@@ -72,8 +75,8 @@ def add_work_parser(previous_works, break_time, work_groups):
                         time = None
 
     if group is None or work is None or time is None:
-        print("Unable to identify the group name, work name, or the time for the work.")
-        print("Asking user the remaining details...")
+        update_append("Unable to identify the group name, work name, or the time for the work.")
+        update_append("Asking user the remaining details...")
 
     # Checks if the work added is a previous work. We don't want to append works that already belong
     # in previous works.
@@ -101,14 +104,15 @@ def add_group_parser(work_groups):
     name = None
     priority = None
 
-    print(f"Format for best results: {add_group_parser_details}")
+    update_append(f"Format for best results: {add_group_parser_details}")
     text = input(f"Please enter {colored("work details", INSTRUCTIONS_COLOR)}: ")
+    update_append(f"Please enter {colored("work details", INSTRUCTIONS_COLOR)}: {text}")
 
     separated_text = text.split(sep=",")
     separated_text = [text.strip() for text in separated_text]
     if len(separated_text) == 1:
-        cprint("Please separate the different sections by a comma.", WARNING_COLOR)
-        print(f"Expected Format: {add_group_parser_details}")
+        update_append(colored("Please separate the different sections by a comma.", WARNING_COLOR))
+        update_append(f"Expected Format: {add_group_parser_details}")
     else:
         for text in separated_text:
             if "g" in text:
@@ -127,7 +131,7 @@ def add_group_parser(work_groups):
                         priority = None
 
         if name is None or priority is None:
-            print("Unable to identify the group name or the priority of the group.")
-            print("Asking user the remaining details...")
+            update_append("Unable to identify the group name or the priority of the group.")
+            update_append("Asking user the remaining details...")
 
     return add_group(original_work_groups=work_groups, group_name=name, group_priority=priority)
