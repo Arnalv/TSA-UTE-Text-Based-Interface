@@ -1,5 +1,4 @@
 from text_parser import *
-import os
 from functions import *
 from termcolor import colored, cprint
 
@@ -21,36 +20,40 @@ work_groups = {}
 # Format: [{work, time}, {work, time}]
 previously_added_works = []
 
+# Colors
 command_color = "green"
 SUCCESS_COLOR = "green"
 
 
 def print_commands():
-    print("QuickStart:")
-    print(f"{APPLICATION_NAME} organizes your daily tasks into various groups with different priorities.")
-    print(f"You can add specific works to these groups and {APPLICATION_NAME} will automatically create your schedule.")
-    print(f"To get started use '{colored("add group", command_color)}' to create your first group and "
-          f"'{colored("add group", command_color)}' to add your first work.\n")
-    print(f"Here are a full list of commands with descriptions:\n"
-          f"'{colored("add work", command_color)}' or '{colored("a", command_color)}': "
-          f"Adds a work to a group\n"
-          f"'{colored("add previous work", command_color)}' or '{colored("ap", command_color)}': "
-          f"Allows you to add a previously added work.\n"
-          f"'{colored("add group", command_color)}' or '{colored("ag", command_color)}': "
-          f"Adds a new group\n"
-          f"'{colored("remove work", command_color)}' or '{colored("r", command_color)}': "
-          f"Removes a work from a group depending\n"
-          f"'{colored("remove group", command_color)}' or '{colored("rg", command_color)}': Removes a group\n"
-          f"'{colored("change default settings", command_color)}' or '{colored("ch_d", command_color)}': "
-          f"Changes default settings\n"
-          f"'{colored("change schedule", command_color)}' or '{colored("ch_s", command_color)}': "
-          f"Edits specific break times or work times in the schedule\n"
-          f"'{colored("clear", command_color)}' or '{colored("c", command_color)}': "
-          f"Clears your entire schedule\n"
-          f"'{colored("show schedule", command_color)}' or '{colored("s", command_color)}': "
-          f"Shows completed schedule\n"
-          f"'{colored("exit", command_color)}': "
-          f"Exits application")
+    update_append("QuickStart:")
+    update_append(f"{APPLICATION_NAME} organizes your daily tasks into various "
+                             f"groups with different priorities.")
+    update_append(f"You can add specific works to these groups and {APPLICATION_NAME} will automatically "
+                  f"create your schedule.")
+    update_append(f"To get started use '{colored("add group", command_color)}' to create your first group.")
+    update_append(f"Then use '{colored("add group", command_color)}' to add your first work.")
+    update_append(f"Here are a full list of commands with descriptions:")
+    update_append(f"'{colored("add work", command_color)}' or '{colored("a", command_color)}': "
+                             f"Adds a work to a group")
+    update_append(f"'{colored("add previous work", command_color)}' or '{colored("ap", command_color)}': "
+                             f"Allows you to add a previously added work")
+    update_append(f"'{colored("add group", command_color)}' or '{colored("ag", command_color)}': "
+                             f"Adds a new group")
+    update_append(f"'{colored("remove work", command_color)}' or '{colored("r", command_color)}': "
+                             f"Removes a work from a group depending")
+    update_append(f"'{colored("remove group", command_color)}' or '{colored("rg", command_color)}': "
+                             f"Removes a group")
+    update_append(f"'{colored("change default settings", command_color)}' or "
+                             f"'{colored("ch_d", command_color)}': "
+                             f"Changes default settings")
+    update_append(f"'{colored("change schedule", command_color)}' or '{colored("ch_s", command_color)}': "
+                             f"Edits specific break times or work times in the schedule")
+    update_append(f"'{colored("clear", command_color)}' or '{colored("c", command_color)}': "
+                             f"Clears your entire schedule")
+    # update_append(f"'{colored("show schedule", command_color)}' or '{colored("s", command_color)}': "
+    #                          f"Shows completed schedule")
+    update_append(f"'{colored("exit", command_color)}': Exits application")
 
 
 def check_user_input(user_input):
@@ -87,10 +90,10 @@ def check_user_input(user_input):
             work_groups = remove_group(work_groups)
         case "rg":
             work_groups = remove_group(work_groups)
-        case "show schedule":
-            work_groups = show_schedule(work_groups, starting_work_time)
-        case "s":
-            work_groups = show_schedule(work_groups, starting_work_time)
+        # case "show schedule":
+        #     work_groups = show_schedule(work_groups, starting_work_time)
+        # case "s":
+        #     work_groups = show_schedule(work_groups, starting_work_time)
         case "change default settings":
             default_settings = change_default_settings(break_time=break_time, starting_time=starting_work_time)
             break_time = default_settings["break_time"]
@@ -116,7 +119,8 @@ def check_user_input(user_input):
             work_groups = add_previous_work(work_groups=work_groups, previous_works=previously_added_works,
                                             break_time=break_time)
 
-    print("\n")
+    other_text.append("")
+    other_text.append("")
 
 
 try:
@@ -176,7 +180,7 @@ if os.path.isfile("./output_text_files/work_groups.txt"):
                 work_groups[work_groups_str[count]] = work_list
                 count += 1
 
-            print("Your previously saved schedule.")
+            schedule_text.append("Your previously saved schedule.")
             work_groups = show_schedule(work_groups, starting_work_time, False)
 
 else:
@@ -184,7 +188,12 @@ else:
     work_groups_file.close()
 
 while True:
-    command = input("Please type 'Help' to see what commands you can use: ").lower().strip()
+    work_groups = show_schedule(work_groups=work_groups, starting_time=starting_work_time)
+    show_text()
+    command = input("Please type 'Help' to see what commands you can use: ")
+    other_text.append(f"Please type 'Help' to see what commands you can use: {command}")
+    command = command.lower().strip()
+
     if check_user_input(command):
         with open(mode="w", file="./output_text_files/default_settings.txt") as default_settings_file:
             default_settings_file.write(f"starting_work_time: {starting_work_time}\n"
