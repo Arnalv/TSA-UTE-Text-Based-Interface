@@ -87,8 +87,8 @@ def remove_work(work_groups: dict, removing_work: list = None) -> dict:
             if len(work_groups_list[group_access_integer]) == 1:
                 update_append(colored("There are no works to remove in this work group.", WARNING_COLOR))
                 update_append(f"{colored("If you want to remove the group, use '", WARNING_COLOR)}"
-                                         f"{colored("remove group", command_color)}"
-                                         f"{colored("'.", WARNING_COLOR)}")
+                              f"{colored("remove group", command_color)}"
+                              f"{colored("'.", WARNING_COLOR)}")
                 return work_groups
             else:
                 length = len(work_groups_list[group_access_integer]) - 1
@@ -106,17 +106,17 @@ def remove_work(work_groups: dict, removing_work: list = None) -> dict:
 
         del work_groups[group_key][1][work_key]
         update_append(f"{colored("The work '", SUCCESS_COLOR)}"
-                                 f"{colored(work_key, WORK_COLOR)}"
-                                 f"{colored("' has been removed from the group '", SUCCESS_COLOR)}"
-                                 f"{colored(group_key, WORK_GROUPS_COLOR)}"
-                                 f"{colored("'.", SUCCESS_COLOR)}")
+                      f"{colored(work_key, WORK_COLOR)}"
+                      f"{colored("' has been removed from the group '", SUCCESS_COLOR)}"
+                      f"{colored(group_key, WORK_GROUPS_COLOR)}"
+                      f"{colored("'.", SUCCESS_COLOR)}")
     else:
         update_append(colored(f"There are no works added to remove.", WARNING_COLOR))
         update_append(f"{colored("First add a group using ", WARNING_COLOR)}"
-                                 f"{colored("add group", command_color)}"
-                                 f"{colored(" and then use ", WARNING_COLOR)}"
-                                 f"{colored("add work", command_color)}"
-                                 f"{colored(" to add a work to the group.", WARNING_COLOR)}")
+                      f"{colored("add group", command_color)}"
+                      f"{colored(" and then use ", WARNING_COLOR)}"
+                      f"{colored("add work", command_color)}"
+                      f"{colored(" to add a work to the group.", WARNING_COLOR)}")
 
     return work_groups
 
@@ -126,8 +126,8 @@ def add_group(original_work_groups, group_name=None, group_priority=None):
 
     # Takes input from the user if not provided in the function
     if group_name is None:
-        group_name = input(f"Name of {colored("group", INSTRUCTIONS_COLOR)}: ")
-        update_append(f"Name of {colored("group", INSTRUCTIONS_COLOR)}: {group_name}")
+        group_name = prompt_append(f"Name of {colored("group", INSTRUCTIONS_COLOR)}: ")
+        # update_append(f"Name of {colored("group", INSTRUCTIONS_COLOR)}: {group_name}")
 
     if group_priority is None:
         group_priority = integer_validator(
@@ -199,24 +199,24 @@ def add_work(work_groups, break_time, group=None, name=None, time_for_work=None)
 
         # Tells the user that there are no work groups present, and you can't add a work
         else:
-            group = input(f"{colored("Group", INSTRUCTIONS_COLOR)} name: ")
-            update_append(f"{colored("Group", INSTRUCTIONS_COLOR)} name: {group}")
+            group = prompt_append(f"{colored("Group", INSTRUCTIONS_COLOR)} name: ")
+            # update_append(f"{colored("Group", INSTRUCTIONS_COLOR)} name: {group}")
 
     # Checks if the name of the group is not provided and gets an input from the user if not provided
     if name is None:
         # Just asks the user a name due to the user not looking through the previous list
-        name = input(f"Please enter {colored("a name", INSTRUCTIONS_COLOR)} for this work: ")
-        update_append(f"Please enter {colored("a name", INSTRUCTIONS_COLOR)} for this work: {name}")
+        name = prompt_append(f"Please enter {colored("a name", INSTRUCTIONS_COLOR)} for this work: ")
+        # update_append(f"Please enter {colored("a name", INSTRUCTIONS_COLOR)} for this work: {name}")
 
     # check if the name provided is duplicate name
     if check_duplicate(work_groups=work_groups, work_name=name):
         update_append(colored("The name of the work already exists.", WARNING_COLOR))
-        new_name = input(f"Please enter another {colored("name", INSTRUCTIONS_COLOR)} for the work: ")
-        update_append(f"Please enter another {colored("name", INSTRUCTIONS_COLOR)} for the work:  {new_name}")
+        new_name = prompt_append(f"Please enter another {colored("name", INSTRUCTIONS_COLOR)} for the work: ")
+        # update_append(f"Please enter another {colored("name", INSTRUCTIONS_COLOR)} for the work:  {new_name}")
         while name == new_name:
             update_append(colored("That name was the same one as the previous name.", WARNING_COLOR))
-            new_name = input("Please enter a new name: ")
-            update_append(f"Please enter a new name: {new_name}")
+            new_name = prompt_append("Please enter a new name: ")
+            # update_append(f"Please enter a new name: {new_name}")
         name = new_name
 
     # Asks the user for the time of the work if not already provided
@@ -309,11 +309,9 @@ def change_default_settings(break_time: int, starting_time: datetime = None) -> 
         break_time = change
         update_append(f"'Break Time' has been changed to {break_time}.")
     elif user_choice == 2:
-        change = input(
+        change = prompt_append(
             f"What time do you want to change the starting time to "
             f"{colored("((0-23):(0-59) or ct for current time)", INSTRUCTIONS_COLOR)}? ")
-        update_append(f"What time do you want to change the starting time to "
-                          f"{colored("((0-23):(0-59) or ct for current time)", INSTRUCTIONS_COLOR)}? {change}")
         while True:
             try:
                 if change.lower() == "ct":
@@ -332,21 +330,16 @@ def change_default_settings(break_time: int, starting_time: datetime = None) -> 
             except TypeError:
                 update_append(colored("Please enter the details as required! ((0-23):(0-59) or ct for "
                                                  "current time)", WARNING_COLOR))
-                change = input(
+                change = prompt_append(
                     f"What time do you want to change the starting time to "
                     f"{colored("((0-23):(0-59) or ct for current time)", INSTRUCTIONS_COLOR)}? ")
-                update_append(f"What time do you want to change the starting time to "
-                                         f"{colored("((0-23):(0-59) or ct for current time)", INSTRUCTIONS_COLOR)}?"
-                                         f" {change}")
+
             except ValueError:
                 update_append(colored("Please enter the details as required! ((0-23):(0-59) or ct for "
                                                  "current time)", WARNING_COLOR))
-                change = input(
+                change = prompt_append(
                     f"What time do you want to change the starting time to "
                     f"{colored("((0-23):(0-59) or ct for current time)", INSTRUCTIONS_COLOR)}? ")
-                update_append(f"What time do you want to change the starting time to "
-                                         f"{colored("((0-23):(0-59) or ct for current time)", INSTRUCTIONS_COLOR)}?"
-                                         f" {change}")
 
     # Asks the user if they want to change something else
     change_again = yes_or_no(f"Do you want to {colored("change another default setting", INSTRUCTIONS_COLOR)} (y/n)? ")
@@ -599,17 +592,15 @@ def add_previous_work(work_groups, previous_works, break_time):
             update_append(colored("The previous work has not been added.", WARNING_COLOR))
             return work_groups
         else:
-            group = input(f"What {colored("group", INSTRUCTIONS_COLOR)} do want to enter this "
-                          f"{colored("work", INSTRUCTIONS_COLOR)} to? ")
-            update_append(f"What {colored("group", INSTRUCTIONS_COLOR)} do want to enter this "
-                              f"{colored("work", INSTRUCTIONS_COLOR)} to? {group}")
+            group = prompt_append(f"What {colored("group", INSTRUCTIONS_COLOR)} do want to enter this "
+                                  f"{colored("work", INSTRUCTIONS_COLOR)} to? ")
 
         work_groups = add_work(work_groups=work_groups, break_time=break_time, group=group, name=work,
                                time_for_work=time)
     else:
         update_append(colored("There are no previous works add.", WARNING_COLOR))
         update_append(f"When you use '{colored("add work", command_color)}' or "
-                                 f"'{colored("a", command_color)}', "
-                                 f"that work will be {colored("saved into your previous work.", INSTRUCTIONS_COLOR)}")
+                      f"'{colored("a", command_color)}', "
+                      f"that work will be {colored("saved into your previous work.", INSTRUCTIONS_COLOR)}")
 
     return work_groups

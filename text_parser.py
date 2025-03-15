@@ -41,8 +41,7 @@ def add_work_parser(previous_works, break_time, work_groups):
     update_append(f"Format for best results "
                              f"{colored("(g = group, w = work_name, t = time)", INSTRUCTIONS_COLOR)}: "
                              f"{add_work_parser_details}")
-    text = input(f"Please enter {colored("work details", INSTRUCTIONS_COLOR)}: ")
-    update_append(f"Please enter {colored("work details", INSTRUCTIONS_COLOR)}: {text}")
+    text = prompt_append(f"Please enter {colored("work details", INSTRUCTIONS_COLOR)}: ")
 
     separated_text = text.split(sep=",")
     if len(separated_text) == 1:
@@ -105,8 +104,8 @@ def add_group_parser(work_groups):
     priority = None
 
     update_append(f"Format for best results: {add_group_parser_details}")
-    text = input(f"Please enter {colored("work details", INSTRUCTIONS_COLOR)}: ")
-    update_append(f"Please enter {colored("work details", INSTRUCTIONS_COLOR)}: {text}")
+    text = prompt_append(f"Please enter {colored("group details", INSTRUCTIONS_COLOR)}: ")
+    # other_text.append(f"Please enter {colored("work details", INSTRUCTIONS_COLOR)}: {text}")
 
     separated_text = text.split(sep=",")
     separated_text = [text.strip() for text in separated_text]
