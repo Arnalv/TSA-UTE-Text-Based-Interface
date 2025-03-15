@@ -24,35 +24,40 @@ previously_added_works = []
 command_color = "green"
 SUCCESS_COLOR = "green"
 
+# Text Speed
+normal_speed = 0.01
+tutorial_speed = 0.03
+long_text_speed = 0.005
+
 
 def print_commands():
     update_append("QuickStart:")
     update_append(f"{APPLICATION_NAME} organizes your daily tasks into various "
-                             f"groups with different priorities.")
+                  f"groups with different priorities.")
+    update_append(f"{colored("Please use the command '", INSTRUCTIONS_COLOR)}"
+                  f"{colored("starter guide", command_color)}"
+                  f"{colored("' to run through the tutorial.", INSTRUCTIONS_COLOR)}")
     update_append(f"You can add specific works to these groups and {APPLICATION_NAME} will automatically "
                   f"create your schedule.")
     update_append(f"To get started use '{colored("add group", command_color)}' to create your first group.")
     update_append(f"Then use '{colored("add group", command_color)}' to add your first work.")
     update_append(f"Here are a full list of commands with descriptions:")
     update_append(f"'{colored("add work", command_color)}' or '{colored("a", command_color)}': "
-                             f"Adds a work to a group")
+                  f"Adds a work to a group")
     update_append(f"'{colored("add previous work", command_color)}' or '{colored("ap", command_color)}': "
-                             f"Allows you to add a previously added work")
+                  f"Allows you to add a previously added work")
     update_append(f"'{colored("add group", command_color)}' or '{colored("ag", command_color)}': "
-                             f"Adds a new group")
+                  f"Adds a new group")
     update_append(f"'{colored("remove work", command_color)}' or '{colored("r", command_color)}': "
-                             f"Removes a work from a group depending")
+                  f"Removes a work from a group depending")
     update_append(f"'{colored("remove group", command_color)}' or '{colored("rg", command_color)}': "
-                             f"Removes a group")
+                  f"Removes a group")
     update_append(f"'{colored("change default settings", command_color)}' or "
-                             f"'{colored("ch_d", command_color)}': "
-                             f"Changes default settings")
+                  f"'{colored("ch_d", command_color)}': Changes default settings")
     update_append(f"'{colored("change schedule", command_color)}' or '{colored("ch_s", command_color)}': "
-                             f"Edits specific break times or work times in the schedule")
+                  f"Edits specific break times or work times in the schedule")
     update_append(f"'{colored("clear", command_color)}' or '{colored("c", command_color)}': "
-                             f"Clears your entire schedule")
-    # update_append(f"'{colored("show schedule", command_color)}' or '{colored("s", command_color)}': "
-    #                          f"Shows completed schedule")
+                  f"Clears your entire schedule")
     update_append(f"'{colored("exit", command_color)}': Exits application")
 
 
@@ -65,7 +70,9 @@ def check_user_input(user_input):
         case "exit":
             return True
         case "help":
+            change_text_speed(long_text_speed)
             print_commands()
+            change_text_speed(normal_speed)
         case "add group":
             work_groups = add_group_parser(work_groups)
         case "ag":
@@ -90,10 +97,6 @@ def check_user_input(user_input):
             work_groups = remove_group(work_groups)
         case "rg":
             work_groups = remove_group(work_groups)
-        # case "show schedule":
-        #     work_groups = show_schedule(work_groups, starting_work_time)
-        # case "s":
-        #     work_groups = show_schedule(work_groups, starting_work_time)
         case "change default settings":
             default_settings = change_default_settings(break_time=break_time, starting_time=starting_work_time)
             break_time = default_settings["break_time"]
@@ -118,9 +121,49 @@ def check_user_input(user_input):
         case "ap":
             work_groups = add_previous_work(work_groups=work_groups, previous_works=previously_added_works,
                                             break_time=break_time)
+        case "starter guide":
+            starter_guide()
 
     other_text.append("")
     other_text.append("")
+
+
+def starter_guide():
+    global command
+
+    change_text_speed(tutorial_speed)
+    update_append("I have detected that this is your first time here!")
+    update_append(f"Welcome to {APPLICATION_NAME}!")
+    update_append("")
+    # Type '{colored("add group", command_color)}'
+    update_append(f"First try to create a work group.")
+    update_append("Groups are an umbrella to your works. Ex: Group: Math, would have Work: Math Homework")
+    # update_append(f"You will also be asked to enter a '{colored("priority number", INSTRUCTIONS_COLOR)}'.")
+    # update_append(f"The {colored("greater the number the more important the works", INSTRUCTIONS_COLOR)}"
+    #               f" in the group are to you.")
+    command = string_validator(
+        f"Please type '{colored("add group", command_color)}' to add a group: ",
+        "add group")
+    other_text.append(f"Please type 'Help' to see what commands you can use: {command}")
+    command = command.lower().strip()
+    check_user_input(command)
+
+    update_append(colored("Congrats!", SUCCESS_COLOR))
+
+    # command = prompt_append(f"Please type '{colored("add work", command_color)}' to add a work: ")
+    # update_append(f"Now try to add a work to the group using '{colored("add work", command_color)}'.")
+    # other_text.append(f"Please type 'Help' to see what commands you can use: {command}")
+    command = string_validator(
+        f"Please type '{colored("add work", command_color)}' to add a work: ",
+        "add work")
+    command = command.lower().strip()
+    check_user_input(command)
+
+    update_append(colored("You have created your work! Look at your schedule to the right!", INSTRUCTIONS_COLOR))
+    update_append(f"You can change the starting time by using '{colored("change default settings", command_color)}'.")
+    update_append("The default is just the current time.")
+    update_append(f"If you want to use the starter guide again, please type "
+                  f"'{colored("starter guide", command_color)}'.")
 
 
 try:
@@ -190,8 +233,11 @@ else:
 while True:
     work_groups = show_schedule(work_groups=work_groups, starting_time=starting_work_time)
     show_text()
-    command = input("Please type 'Help' to see what commands you can use: ")
-    other_text.append(f"Please type 'Help' to see what commands you can use: {command}")
+    if not work_groups and not previously_added_works:
+        check_user_input("starter guide")
+        work_groups = show_schedule(work_groups=work_groups, starting_time=starting_work_time)
+        show_text()
+    command = prompt_append("Please type 'Help' to see what commands you can use: ")
     command = command.lower().strip()
 
     if check_user_input(command):
@@ -259,5 +305,3 @@ while True:
 
             schedule_file.writelines(write_lines)
         break
-
-# hello
