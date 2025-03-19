@@ -5,7 +5,7 @@ WARNING_COLOR = "red"
 
 def yes_or_no(prompt):
     user_answer = prompt_append(prompt).lower()
-    # other_text.append(f"{prompt}{user_answer}")
+    other_text.append(f"{prompt}{user_answer}")
     while user_answer != 'y' and user_answer != 'n':
         other_text.append(colored("Please enter 'y' or 'n'!", WARNING_COLOR))
         user_answer = prompt_append(prompt).lower()
@@ -17,6 +17,7 @@ def integer_validator(prompt, minimum=None, maximum=None):
     while True:
         try:
             user_input = int(prompt_append(prompt))
+            other_text.append(f"{prompt}{user_input}")
             if minimum is not None:
                 if minimum <= user_input:
                     first_condition = True
@@ -40,8 +41,6 @@ def integer_validator(prompt, minimum=None, maximum=None):
             else:
                 other_text.append(colored(f"Please make sure the integer is in the range of {minimum}-{maximum}.", WARNING_COLOR))
         except TypeError:
-            other_text.append(colored(f"Please enter an integer in the range of {minimum}-{maximum}!", WARNING_COLOR))
-        except ValueError:
             other_text.append(colored(f"Please enter an integer in the range of {minimum}-{maximum}!", WARNING_COLOR))
 
     return user_input
