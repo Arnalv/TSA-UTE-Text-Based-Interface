@@ -1,6 +1,7 @@
 from text_parser import *
 from functions import *
 from termcolor import colored, cprint
+from AI import ai_parsing
 
 APPLICATION_NAME = "AutoSchedule"
 
@@ -49,7 +50,7 @@ def print_commands():
     update_append(f"'{colored("add group", command_color)}' or '{colored("ag", command_color)}': "
                   f"Adds a new group")
     update_append(f"'{colored("remove work", command_color)}' or '{colored("r", command_color)}': "
-                  f"Removes a work from a group depending")
+                  f"Removes a work from a group")
     update_append(f"'{colored("remove group", command_color)}' or '{colored("rg", command_color)}': "
                   f"Removes a group")
     update_append(f"'{colored("change default settings", command_color)}' or "
@@ -66,104 +67,80 @@ def check_user_input(user_input):
     global break_time
     global starting_work_time
     global previously_added_works
-    match user_input:
-        case "exit":
-            return True
-        case "help":
-            change_text_speed(long_text_speed)
-            print_commands()
-            change_text_speed(normal_speed)
-        case "add group":
-            work_groups = add_group_parser(work_groups)
-        case "ag":
-            work_groups = add_group_parser(work_groups)
-        case "add work":
-            return_items = add_work_parser(previous_works=previously_added_works, break_time=break_time,
-                                           work_groups=work_groups)
 
-            work_groups = return_items["work_groups"]
-            previously_added_works = return_items["previously_added_works"]
-        case "a":
-            return_items = add_work_parser(previous_works=previously_added_works, break_time=break_time,
-                                           work_groups=work_groups)
+    return_items = make_dictionary_with_break_times(work_groups=work_groups)
+    dictionary_with_break_times = return_items["dictionary_including_break_times"]
+    work_groups = return_items["work_groups"]
+    command_dict = ai_parsing(prompt=user_input, work_groups=work_groups, previous_works_list=previously_added_works,
+                              dictionary_with_break_times=dictionary_with_break_times)
+    if command_dict:
+        match command_dict["command"]:
+            case "exit":
+                return True
+            case "help":
+                change_text_speed(long_text_speed)
+                print_commands()
+                change_text_speed(normal_speed)
+            case "add group":
+                work_groups = add_group(work_groups, command_dict)
+            case "ag":
+                work_groups = add_group(work_groups, command_dict)
+            case "add work":
+                return_items = add_work_parser(previous_works=previously_added_works, break_time=break_time,
+                                               work_groups=work_groups, user_inputs=command_dict)
 
-            work_groups = return_items["work_groups"]
-            previously_added_works = return_items["previously_added_works"]
-        case "remove work":
-            work_groups = remove_work(work_groups)
-        case "r":
-            work_groups = remove_work(work_groups)
-        case "remove group":
-            work_groups = remove_group(work_groups)
-        case "rg":
-            work_groups = remove_group(work_groups)
-        case "change default settings":
-            default_settings = change_default_settings(break_time=break_time, starting_time=starting_work_time)
-            break_time = default_settings["break_time"]
-            starting_work_time = default_settings["starting_time"]
-        case "ch_d":
-            default_settings = change_default_settings(break_time=break_time, starting_time=starting_work_time)
-            break_time = default_settings["break_time"]
-            starting_work_time = default_settings["starting_time"]
-        case "change schedule":
-            work_groups = change_schedule(work_groups, starting_work_time)
-        case "ch_s":
-            work_groups = change_schedule(work_groups, starting_work_time)
-        case "clear":
-            work_groups = {}
-            cprint("Schedule has been cleared.", SUCCESS_COLOR)
-        case "c":
-            work_groups = {}
-            cprint("Schedule has been cleared.", SUCCESS_COLOR)
-        case "add previous work":
-            work_groups = add_previous_work(work_groups=work_groups, previous_works=previously_added_works,
-                                            break_time=break_time)
-        case "ap":
-            work_groups = add_previous_work(work_groups=work_groups, previous_works=previously_added_works,
-                                            break_time=break_time)
-        case "starter guide":
-            starter_guide()
+                work_groups = return_items["work_groups"]
+                previously_added_works = return_items["previously_added_works"]
+            case "a":
+                return_items = add_work_parser(previous_works=previously_added_works, break_time=break_time,
+                                               work_groups=work_groups, user_inputs=command_dict)
+
+                work_groups = return_items["work_groups"]
+                previously_added_works = return_items["previously_added_works"]
+            case "remove work":
+                work_groups = remove_work(work_groups, command_dict)
+            case "r":
+                work_groups = remove_work(work_groups, command_dict)
+            case "remove group":
+                work_groups = remove_group(work_groups, command_dict)
+            case "rg":
+                work_groups = remove_group(work_groups, command_dict)
+            case "change default settings":
+                default_settings = change_default_settings(break_time=break_time, starting_time=starting_work_time,
+                                                           user_inputs=command_dict)
+                break_time = default_settings["break_time"]
+                starting_work_time = default_settings["starting_time"]
+            case "ch_d":
+                default_settings = change_default_settings(break_time=break_time, starting_time=starting_work_time,
+                                                           user_inputs=command_dict)
+                break_time = default_settings["break_time"]
+                starting_work_time = default_settings["starting_time"]
+            case "change schedule":
+                work_groups = change_schedule(work_groups, command_dict, starting_work_time)
+            case "ch_s":
+                work_groups = change_schedule(work_groups, command_dict, starting_work_time)
+            case "clear":
+                work_groups = {}
+                cprint("Schedule has been cleared.", SUCCESS_COLOR)
+            case "c":
+                work_groups = {}
+                cprint("Schedule has been cleared.", SUCCESS_COLOR)
+            case "add previous work":
+                work_groups = add_previous_work(work_groups=work_groups, previous_works=previously_added_works,
+                                                break_time=break_time, user_inputs=command_dict)
+            case "ap":
+                work_groups = add_previous_work(work_groups=work_groups, previous_works=previously_added_works,
+                                                break_time=break_time, user_inputs=command_dict)
+            case "starter guide":
+                starter_guide()
+    else:
+        update_append(colored(text="I am unable to identify your intentions. Please be a bit more clear.",
+                              color=INSTRUCTIONS_COLOR))
+        update_append(colored(text="You can type 'help' to see what functionality I have.",
+                              color=INSTRUCTIONS_COLOR))
 
     other_text.append("")
     other_text.append("")
-
-
-def starter_guide():
-    global command
-
-    change_text_speed(tutorial_speed)
-    update_append("I have detected that this is your first time here!")
-    update_append(f"Welcome to {APPLICATION_NAME}!")
-    update_append("")
-    # Type '{colored("add group", command_color)}'
-    update_append(f"First try to create a work group.")
-    update_append("Groups are an umbrella to your works. Ex: Group: Math, would have Work: Math Homework")
-    # update_append(f"You will also be asked to enter a '{colored("priority number", INSTRUCTIONS_COLOR)}'.")
-    # update_append(f"The {colored("greater the number the more important the works", INSTRUCTIONS_COLOR)}"
-    #               f" in the group are to you.")
-    command = string_validator(
-        f"Please type '{colored("add group", command_color)}' to add a group: ",
-        "add group")
-    other_text.append(f"Please type 'Help' to see what commands you can use: {command}")
-    command = command.lower().strip()
-    check_user_input(command)
-
-    update_append(colored("Congrats!", SUCCESS_COLOR))
-
-    # command = prompt_append(f"Please type '{colored("add work", command_color)}' to add a work: ")
-    # update_append(f"Now try to add a work to the group using '{colored("add work", command_color)}'.")
-    # other_text.append(f"Please type 'Help' to see what commands you can use: {command}")
-    command = string_validator(
-        f"Please type '{colored("add work", command_color)}' to add a work: ",
-        "add work")
-    command = command.lower().strip()
-    check_user_input(command)
-
-    update_append(colored("You have created your work! Look at your schedule to the right!", INSTRUCTIONS_COLOR))
-    update_append(f"You can change the starting time by using '{colored("change default settings", command_color)}'.")
-    update_append("The default is just the current time.")
-    update_append(f"If you want to use the starter guide again, please type "
-                  f"'{colored("starter guide", command_color)}'.")
 
 
 try:
@@ -229,6 +206,41 @@ if os.path.isfile("./output_text_files/work_groups.txt"):
 else:
     work_groups_file = open(mode="x", file="./output_text_files/work_groups.txt")
     work_groups_file.close()
+
+
+def starter_guide():
+    global command
+
+    change_text_speed(tutorial_speed)
+    update_append("I have detected that this is your first time here!")
+    update_append(f"Welcome to {APPLICATION_NAME}!")
+    update_append("")
+    update_append(f"First try to create a work group.")
+    update_append("Groups are an umbrella to your works. Ex: Group: Math, would have Work: Math Homework")
+    command = string_validator(
+        f"Please type '{colored("add group", command_color)}' to add a group: ",
+        "add group")
+    other_text.append(f"Please type 'Help' to see what commands you can use: {command}")
+    command = command.lower().strip()
+    check_user_input(command)
+
+    update_append(colored("Congrats!", SUCCESS_COLOR))
+    command = string_validator(
+        f"Please type '{colored("add work", command_color)}' to add a work: ",
+        "add work")
+    command = command.lower().strip()
+    check_user_input(command)
+
+    update_append(colored("Congrats, you have created your work!", INSTRUCTIONS_COLOR))
+    update_append(f"Since this is a tutorial, we have made you input specific inputs to get a feel for the interface.")
+    update_append(colored(f"You can have more diversified inputs, but be sure to make sure you have "
+                          f"all the information provided in the input.", INSTRUCTIONS_COLOR))
+    update_append(f"You can change the starting time by using '{colored("change default settings", command_color)}'.")
+    update_append("The default is just the current time.")
+    update_append(f"If you want to use the starter guide again, please type "
+                  f"'{colored("starter guide", command_color)}'.")
+    update_append(colored("Look at your schedule to the right!", INSTRUCTIONS_COLOR))
+
 
 while True:
     work_groups = show_schedule(work_groups=work_groups, starting_time=starting_work_time)

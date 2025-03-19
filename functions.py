@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from input_validation import *
 from termcolor import colored
-from text_manager import other_text, schedule_text
+from text_manager import schedule_text
 
 # General Colors
 WARNING_COLOR = "red"
@@ -38,14 +38,18 @@ def show_options(work_groups):
     return work_groups_list
 
 
-def remove_group(work_groups: dict, removing_group=None) -> dict:
+def remove_group(work_groups: dict, user_inputs: dict = None, removing_group=None) -> dict:
     """
     Removes a group from work groups.
     """
-
+    if user_inputs is None:
+        if removing_group is None:
+            removing_group = "none"
+    else:
+        removing_group = user_inputs["inputs_needed"]["group_name"]
     if work_groups:
         # Checks if the removing group has been provided
-        if removing_group is None:
+        if removing_group == "none":
             work_groups_list = show_options(work_groups)
             length = len(work_groups)
             group_access_integer = integer_validator(
@@ -64,16 +68,21 @@ def remove_group(work_groups: dict, removing_group=None) -> dict:
     else:
         update_append(colored("There are no groups to remove.", WARNING_COLOR))
         update_append(f"{colored("To add a group use '", WARNING_COLOR)}"
-                                 f"{colored("add group", command_color)}"
-                                 f"{colored("'.", WARNING_COLOR)}")
+                      f"{colored("add group", command_color)}"
+                      f"{colored("'.", WARNING_COLOR)}")
 
     # Returns the updated work_groups
     return work_groups
 
 
-def remove_work(work_groups: dict, removing_work: list = None) -> dict:
+def remove_work(work_groups: dict, user_inputs: dict = None, removing_work=None) -> dict:
     if work_groups:
-        if removing_work is None:
+        if user_inputs is None:
+            if removing_work is None:
+                removing_work = "none"
+        else:
+            removing_work = user_inputs["inputs_needed"]["removing_work"]
+        if removing_work == "none":
             work_groups_list = show_options(work_groups)
 
             length = len(work_groups_list)
@@ -121,15 +130,24 @@ def remove_work(work_groups: dict, removing_work: list = None) -> dict:
     return work_groups
 
 
-def add_group(original_work_groups, group_name=None, group_priority=None):
+def add_group(original_work_groups, user_inputs=None, group_name=None, group_priority=None):
     work_groups = original_work_groups
-
+    if user_inputs is None:
+        if group_name is None:
+            group_name = "none"
+    else:
+        group_name = user_inputs["inputs_needed"]["group_name"]
     # Takes input from the user if not provided in the function
-    if group_name is None:
-        group_name = prompt_append(f"Name of {colored("group", INSTRUCTIONS_COLOR)}: ")
+    if group_name == "none":
+        group_name = prompt_append(f"Name of {colored("group", INSTRUCTIONS_COLOR)}: ").strip()
         # update_append(f"Name of {colored("group", INSTRUCTIONS_COLOR)}: {group_name}")
 
-    if group_priority is None:
+    if user_inputs is None:
+        if group_priority is None:
+            group_priority = "none"
+    else:
+        group_priority = user_inputs["inputs_needed"]["priority_number"]
+    if group_priority == "none":
         group_priority = integer_validator(
             prompt=f"What {colored("priority level", INSTRUCTIONS_COLOR)} would you like "
                    f"'{colored(group_name, WORK_GROUPS_COLOR)}' to have? (1-10) ",
@@ -141,8 +159,8 @@ def add_group(original_work_groups, group_name=None, group_priority=None):
     if group_name not in work_groups:
         work_groups[group_name] = [group_priority]
         update_append(f"{colored("Work Group '", SUCCESS_COLOR)}"
-                                 f"{colored(group_name, WORK_GROUPS_COLOR)}"
-                                 f"{colored("' has been added.", SUCCESS_COLOR)}")
+                      f"{colored(group_name, WORK_GROUPS_COLOR)}"
+                      f"{colored("' has been added.", SUCCESS_COLOR)}")
     else:
         update_append(colored("Work group already exists!", WARNING_COLOR))
 
@@ -163,10 +181,9 @@ def check_duplicate(work_groups: dict, work_name: str) -> bool:
     return False
 
 
-def add_work(work_groups, break_time, group=None, name=None, time_for_work=None):
-
+def add_work(work_groups, break_time, previous_works, group=None, name=None, time_for_work=None):
     # Takes input from user if not already provided
-    if group is None:
+    if group == "none":
         # Checks if work_groups is empty
         if work_groups != {}:
 
@@ -175,13 +192,13 @@ def add_work(work_groups, break_time, group=None, name=None, time_for_work=None)
             for key, value in work_groups.items():
                 work_group_number += 1
                 update_append(f"{work_group_number}. {colored(key, WORK_GROUPS_COLOR)} "
-                                         f"(Priority: {value[0]})")
+                              f"(Priority: {value[0]})")
                 work_number = 0
                 if len(value) > 1:
                     for work, time in value[1].items():
                         work_number += 1
                         update_append(f"    {work_number}. {colored(work, WORK_COLOR)}, "
-                                                 f"Time: {time} minutes")
+                                      f"Time: {time} minutes")
 
             # Asks user to choose from list of groups shown
             group_number = integer_validator(prompt=f"What work group would you like to add your work to? "
@@ -203,9 +220,9 @@ def add_work(work_groups, break_time, group=None, name=None, time_for_work=None)
             # update_append(f"{colored("Group", INSTRUCTIONS_COLOR)} name: {group}")
 
     # Checks if the name of the group is not provided and gets an input from the user if not provided
-    if name is None:
+    if name == "none":
         # Just asks the user a name due to the user not looking through the previous list
-        name = prompt_append(f"Please enter {colored("a name", INSTRUCTIONS_COLOR)} for this work: ")
+        name = prompt_append(f"Please enter {colored("a name", INSTRUCTIONS_COLOR)} for this work: ").strip()
         # update_append(f"Please enter {colored("a name", INSTRUCTIONS_COLOR)} for this work: {name}")
 
     # check if the name provided is duplicate name
@@ -220,9 +237,9 @@ def add_work(work_groups, break_time, group=None, name=None, time_for_work=None)
         name = new_name
 
     # Asks the user for the time of the work if not already provided
-    if time_for_work is None:
+    if time_for_work == "none":
         time_for_work = integer_validator(
-            prompt=f"About how many {colored("minutes", INSTRUCTIONS_COLOR)} that does this work take?", minimum=1)
+            prompt=f"About how many {colored("minutes", INSTRUCTIONS_COLOR)} that does this work take? ", minimum=1)
 
     # Checks if a provided group is not in work_groups
     if group not in work_groups:
@@ -233,12 +250,12 @@ def add_work(work_groups, break_time, group=None, name=None, time_for_work=None)
             work_groups = add_group(group_name=group, original_work_groups=work_groups)
         else:
             update_append(colored("Adding work to schedule not successful. Make sure the work you intended "
-                                             "to add has a valid work group (spelled correctly).", WARNING_COLOR))
+                                  "to add has a valid work group (spelled correctly).", WARNING_COLOR))
             update_append(f"{colored("If work group is not created yet, please type '", WARNING_COLOR)}"
-                                     f"{colored("add group", command_color)}"
-                                     f"{colored("' or '", WARNING_COLOR)}"
-                                     f"{colored("ag", command_color)}"
-                                     f"{colored("' to create one.", WARNING_COLOR)}")
+                          f"{colored("add group", command_color)}"
+                          f"{colored("' or '", WARNING_COLOR)}"
+                          f"{colored("ag", command_color)}"
+                          f"{colored("' to create one.", WARNING_COLOR)}")
             return work_groups
 
     # Add the work to the work group
@@ -249,10 +266,26 @@ def add_work(work_groups, break_time, group=None, name=None, time_for_work=None)
         work_groups[group][1][name] = [time_for_work, break_time]
 
     update_append(f"Work '{colored(name, WORK_COLOR)}' has been added to the work group "
-                             f"'{colored(group, WORK_GROUPS_COLOR)}'.")
+                  f"'{colored(group, WORK_GROUPS_COLOR)}'.")
+
+    # Checks if the work added is a previous work. We don't want to append works that already belong
+    # in previous works.
+    work_exists_in_previous_works = False
+    if name is not None and time_for_work is not None:
+        for previous_work in previous_works:
+            if name in previous_work:
+                work_exists_in_previous_works = True
+
+    if not work_exists_in_previous_works and name is not None:
+        previous_works.append({name: time_for_work})
+
+    return_items = {
+        "work_groups": work_groups,
+        "previous_works": previous_works
+    }
 
     # Returns the items
-    return work_groups
+    return return_items
 
 
 def format_time(time):
@@ -286,67 +319,93 @@ def print_work_with_time(work, starting_time, minutes):
             "text": f"{work}: {starting_time_str} -- {ending_time_str}"}
 
 
-def change_default_settings(break_time: int, starting_time: datetime = None) -> dict:
-    # Prints the current options
-    update_append(f"1. {colored("Break Time", BREAK_TIME_COLOR)}: {break_time}")
-    if starting_time is None:
-        update_append(f"2. {colored("Starting Time", WORK_GROUPS_COLOR)}: Current Time")
-        starting_time = datetime.now()
-    else:
-        update_append(f"2. {colored("Starting Time", WORK_GROUPS_COLOR)}: {format_time(starting_time)}")
+def change_default_settings(break_time: int, user_inputs: dict, starting_time: datetime = None) -> dict:
+    option = user_inputs["inputs_needed"]["change_option"]
 
-    # Asks the user to choose
-    user_choice = integer_validator(prompt=f"Choose the {colored("number", INSTRUCTIONS_COLOR)} "
-                                           f"corresponding to the setting you want to change (1-2): ",
-                                    minimum=1, maximum=2)
+    if option == "none":
+        # Prints the current options
+        update_append(f"1. {colored("Break Time", BREAK_TIME_COLOR)}: {break_time}")
+        if starting_time is None:
+            update_append(f"2. {colored("Starting Time", WORK_GROUPS_COLOR)}: Current Time")
+            starting_time = datetime.now()
+        else:
+            update_append(f"2. {colored("Starting Time", WORK_GROUPS_COLOR)}: {format_time(starting_time)}")
 
+        # Asks the user to choose
+        option = integer_validator(prompt=f"Choose the {colored("number", INSTRUCTIONS_COLOR)} "
+                                          f"corresponding to the setting you want to change (1-2): ",
+                                   minimum=1, maximum=2)
+
+    change = user_inputs["inputs_needed"]["change_value"]
     # Updates the corresponding values with user inputs
-    if user_choice == 1:
-        change = integer_validator(
-            prompt=f"What would you like to change the "
-                   f"{colored("default break time", INSTRUCTIONS_COLOR)} to (minutes)? ",
-            minimum=0)
+    if option == 1:
+        if change == "none":
+            change = integer_validator(
+                prompt=f"What would you like to change the "
+                       f"{colored("default break time", INSTRUCTIONS_COLOR)} to (minutes)? ",
+                minimum=0)
         break_time = change
         update_append(f"'Break Time' has been changed to {break_time}.")
-    elif user_choice == 2:
-        change = prompt_append(
-            f"What time do you want to change the starting time to "
-            f"{colored("((0-23):(0-59) or ct for current time)", INSTRUCTIONS_COLOR)}? ")
-        while True:
-            try:
-                if change.lower() == "ct":
-                    starting_time = datetime.now()
-                    update_append(colored("Default Setting changed to current time.", SUCCESS_COLOR))
-                else:
-                    hour = int(change.split(sep=":")[0])
-                    minute = int(change.split(sep=":")[1])
-                    today = datetime.now()
-                    starting_time = datetime(year=today.year, month=today.month, day=today.day,
-                                             hour=hour, minute=minute)
-                    update_append(colored(f"'Starting Time' has been changed to "
-                                                     f"{format_time(starting_time)}.",
-                                                     SUCCESS_COLOR))
-                break
-            except TypeError:
-                update_append(colored("Please enter the details as required! ((0-23):(0-59) or ct for "
-                                                 "current time)", WARNING_COLOR))
-                change = prompt_append(
-                    f"What time do you want to change the starting time to "
-                    f"{colored("((0-23):(0-59) or ct for current time)", INSTRUCTIONS_COLOR)}? ")
+    elif option == 2:
+        if change == "none":
+            change = prompt_append(
+                f"What time do you want to change the starting time to "
+                f"{colored("((0-23):(0-59) or ct for current time)", INSTRUCTIONS_COLOR)}? ")
+            while True:
+                try:
+                    if change.lower() == "ct":
+                        starting_time = datetime.now()
+                        update_append(colored("Default Setting changed to current time.", SUCCESS_COLOR))
+                    else:
+                        hour = int(change.split(sep=":")[0])
+                        minute = int(change.split(sep=":")[1])
+                        today = datetime.now()
+                        starting_time = datetime(year=today.year, month=today.month, day=today.day,
+                                                 hour=hour, minute=minute)
+                        update_append(colored(f"'Starting Time' has been changed to "
+                                              f"{format_time(starting_time)}.",
+                                              SUCCESS_COLOR))
+                    break
+                except TypeError:
+                    update_append(colored("Please enter the details as required! ((0-23):(0-59) or ct for "
+                                          "current time)", WARNING_COLOR))
+                    change = prompt_append(
+                        f"What time do you want to change the starting time to "
+                        f"{colored("((0-23):(0-59) or ct for current time)", INSTRUCTIONS_COLOR)}? ")
 
-            except ValueError:
-                update_append(colored("Please enter the details as required! ((0-23):(0-59) or ct for "
-                                                 "current time)", WARNING_COLOR))
-                change = prompt_append(
-                    f"What time do you want to change the starting time to "
-                    f"{colored("((0-23):(0-59) or ct for current time)", INSTRUCTIONS_COLOR)}? ")
+                except ValueError:
+                    update_append(colored("Please enter the details as required! ((0-23):(0-59) or ct for "
+                                          "current time)", WARNING_COLOR))
+                    change = prompt_append(
+                        f"What time do you want to change the starting time to "
+                        f"{colored("((0-23):(0-59) or ct for current time)", INSTRUCTIONS_COLOR)}? ")
+        else:
+            if change.lower() == "ct":
+                starting_time = datetime.now()
+                update_append(colored("Default Setting changed to current time.", SUCCESS_COLOR))
+            else:
+                hour = int(change.split(sep=":")[0])
+                minute = int(change.split(sep=":")[1])
+                today = datetime.now()
+                starting_time = datetime(year=today.year, month=today.month, day=today.day,
+                                         hour=hour, minute=minute)
+                update_append(colored(f"'Starting Time' has been changed to "
+                                      f"{format_time(starting_time)}.",
+                                      SUCCESS_COLOR))
 
     # Asks the user if they want to change something else
     change_again = yes_or_no(f"Do you want to {colored("change another default setting", INSTRUCTIONS_COLOR)} (y/n)? ")
 
     # Does recursion if true
     if change_again == "y":
-        default_settings = change_default_settings(break_time, starting_time)
+        user_inputs = {
+            "command": "change_default_settings",
+            "inputs_needed": {
+                "change_option": "none",
+                "change_value": "none"
+            }
+        }
+        default_settings = change_default_settings(break_time, user_inputs, starting_time)
         return default_settings
 
     # Returning values
@@ -468,55 +527,79 @@ def show_schedule(work_groups, starting_time: datetime = None, use_intro=True):
     return work_groups
 
 
-def change_schedule(work_groups, starting_time=None):
+def make_dictionary_with_break_times(work_groups):
+    work_dict_including_break = {}
+    count = 0
+    return_items = organize_by_priority(work_groups=work_groups)
+    work_groups = return_items["work_groups"]
+    priority_ordered_schedule = return_items["priority_ordered_work"]
+    for work_name, work_details in priority_ordered_schedule.items():
+        work_dict_including_break[work_name] = work_details[0]
+        count += 1
+        work_dict_including_break[f"break_time{count}"] = work_details[1]
+
+    return_items = {
+        "work_groups": work_groups,
+        "dictionary_including_break_times": work_dict_including_break
+    }
+    return return_items
+
+
+def change_schedule(work_groups, user_inputs, starting_time=None):
     if works_exist(work_groups=work_groups):
         # Sets the starting time to the current time, if it is None
         if starting_time is None:
             starting_time = datetime.now()
 
+        return_items = make_dictionary_with_break_times(work_groups=work_groups)
+        work_dict_including_break = return_items["dictionary_including_break_times"]
+        work_groups = return_items["work_groups"]
+
         # Creates a duplicate of the starting time for later use
         original_starting_time = starting_time
 
-        return_items = organize_by_priority(work_groups=work_groups)
-        work_groups = return_items["work_groups"]
-        priority_ordered_schedule = return_items["priority_ordered_work"]
+        index = user_inputs["inputs_needed"]["position"]
 
-        # Prints out the schedule for the user to be able to edit
-        count = 0
-        # [{work, time}, {break: time}]
-        work_dict_including_break = {}
-        for work_name, work_details in priority_ordered_schedule.items():
-            # Prints the work timings
-            count += 1
-            update_append(f"{count}. ", end="")
+        if index == "none":
+            return_items = organize_by_priority(work_groups=work_groups)
+            work_groups = return_items["work_groups"]
+            priority_ordered_schedule = return_items["priority_ordered_work"]
 
-            return_items = print_work_with_time(colored(work_name, WORK_COLOR), starting_time, work_details[0])
-            starting_time = return_items["starting_time"]
-            update_append(return_items["text"])
+            # Prints out the schedule for the user to be able to edit
+            count = 0
+            # {work: time, break: time}
+            for work_name, work_details in priority_ordered_schedule.items():
+                # Prints the work timings
+                count += 1
+                return_items = print_work_with_time(colored(work_name, WORK_COLOR), starting_time, work_details[0])
+                starting_time = return_items["starting_time"]
+                update_append(f"{count}. {return_items["text"]}")
+                update_append(f"Time: {work_details[0]} minutes")
+                work_dict_including_break[work_name] = work_details[0]
 
-            update_append(f"Time: {work_details[0]} minutes")
-            work_dict_including_break[work_name] = work_details[0]
+                # Blank line for spacing
+                update_append("")
 
-            # Blank line for spacing
-            update_append("")
+                # Prints break time timings
+                count += 1
+                return_items = print_work_with_time(colored("BREAK TIME", BREAK_TIME_COLOR), starting_time,
+                                                    work_details[1])
+                starting_time = return_items["starting_time"]
+                update_append(f"{count}. {return_items["text"]}")
+                update_append(f"Time: {work_details[1]} minutes")
+                work_dict_including_break[f"break_time{count}"] = work_details[1]
 
-            # Prints break time timings
-            count += 1
-            update_append(f"{count}. ", end="")
-            return_items = print_work_with_time(colored("BREAK TIME", BREAK_TIME_COLOR), starting_time,
-                                                work_details[1])
-            starting_time = return_items["starting_time"]
-            update_append(return_items["text"])
-            update_append(f"Time: {work_details[1]} minutes")
-            work_dict_including_break[f"break_time{count}"] = work_details[1]
+                # Blank line for spacing
+                update_append("")
 
-            # Blank line for spacing
-            update_append("")
+            # After displaying, asks the user to choose the number of the item they want to change
+            index = integer_validator(prompt="Select the number corresponding to the part you want to change: ",
+                                      minimum=1, maximum=count)
 
-        # After displaying, asks the user to choose the number of the item they want to change
-        user_choice = integer_validator(prompt="Select the number corresponding to the part you want to change: ",
-                                        minimum=1, maximum=count)
-
+        time_change = user_inputs["inputs_needed"]["change_value"]
+        if time_change == "none":
+            time_change = integer_validator(prompt=f"What would you like to change the "
+                                                   f"{colored("time", INSTRUCTIONS_COLOR)} to (minutes)? ")
         # Makes the changes in the actual work_groups
         count = 0
         before_break_work_name = ""
@@ -524,9 +607,7 @@ def change_schedule(work_groups, starting_time=None):
             count += 1
             if count % 2 == 1:
                 before_break_work_name = work_name
-            if count == user_choice:
-                time_change = integer_validator(prompt=f"What would you like to change the "
-                                                       f"{colored("time", INSTRUCTIONS_COLOR)} to (minutes)? ")
+            if count == index:
                 for work_group, works in work_groups.items():
                     if len(works) > 1:
                         for actual_work_name, work_details in works[1].items():
@@ -535,7 +616,6 @@ def change_schedule(work_groups, starting_time=None):
                                     work_groups[work_group][1][actual_work_name][1] = time_change
                                 else:
                                     work_groups[work_group][1][actual_work_name][0] = time_change
-
         # Prints that the change has been successful
         update_append(colored("Change has been successful.", SUCCESS_COLOR))
 
@@ -555,48 +635,54 @@ def change_schedule(work_groups, starting_time=None):
     return work_groups
 
 
-def add_previous_work(work_groups, previous_works, break_time):
-
+def add_previous_work(work_groups, previous_works, break_time, user_inputs):
     if previous_works:
-        work = None
+        index = user_inputs["inputs_needed"]["index_number"]
+        if index == "none":
+            update_append(colored("Unable to identify the work.", INSTRUCTIONS_COLOR))
+            # Displays to the user the options
+            count = 0
+            for work in previous_works:
+                count += 1
+                update_append(f"{count}. {colored(f"{work}", WORK_COLOR)}")
+
+            # Asks user about their choice
+            index = integer_validator(
+                prompt=f"Which {colored("previously added work", INSTRUCTIONS_COLOR)} do you want to add? ",
+                minimum=1, maximum=count) - 1
+
+        work = user_inputs["inputs_needed"]["work_name"]
         time = None
-
-        # Displays to the user the options
-        count = 0
-        for work in previous_works:
-            count += 1
-            update_append(f"{count}. {colored("work", WORK_COLOR)}")
-
-        # Asks user about their choice
-        user_choice = integer_validator(
-            prompt=f"Which {colored("previously added work", INSTRUCTIONS_COLOR)} do you want to add? ",
-            minimum=0, maximum=count)
-
-        # Updates the values accordingly
-        for work_name, time in previous_works[user_choice - 1].items():
-            # Updates the name
-            work = work_name
-            # Asks the user if they want to change the time of the given work
-            user_choice = yes_or_no(prompt=f"Do you want to change the "
-                                           f"{colored("amount of time", INSTRUCTIONS_COLOR)} this work takes (y/n)? ")
-            if user_choice == "y":
-                new_time = integer_validator(prompt=f"What do you want to change the "
-                                                    f"{colored("time", INSTRUCTIONS_COLOR)} to? ")
-            else:
-                new_time = time
-            # Updates the time
-            time = new_time
+        if work == "none":
+            for work_name, time_for_work in previous_works[index - 1].items():
+                work = work_name
+                time = time_for_work
+        else:
+            time = previous_works[index][work]
 
         if check_duplicate(work_groups=work_groups, work_name=work):
-            update_append(colored("A work already exists with a name as this previous work.", WARNING_COLOR))
-            update_append(colored("The previous work has not been added.", WARNING_COLOR))
-            return work_groups
-        else:
+            update_append(colored("The name of the work already exists.", WARNING_COLOR))
+            new_name = prompt_append(f"Please enter another {colored("name", INSTRUCTIONS_COLOR)} for the work: ")
+            while work == new_name:
+                update_append(colored("That name was the same one as the previous name.", WARNING_COLOR))
+                new_name = prompt_append("Please enter a new name: ")
+            work = new_name
+
+        group = user_inputs["inputs_needed"]["group_name"]
+        if group == "none":
             group = prompt_append(f"What {colored("group", INSTRUCTIONS_COLOR)} do want to enter this "
                                   f"{colored("work", INSTRUCTIONS_COLOR)} to? ")
 
-        work_groups = add_work(work_groups=work_groups, break_time=break_time, group=group, name=work,
-                               time_for_work=time)
+        # Asks the user if they want to change the time of the given work
+        user_choice = yes_or_no(prompt=f"Do you want to change the "
+                                       f"{colored("amount of time", INSTRUCTIONS_COLOR)} this work takes (y/n)? ")
+        if user_choice == "y":
+            time = integer_validator(prompt=f"What do you want to change the "
+                                            f"{colored("time", INSTRUCTIONS_COLOR)} to? ",
+                                     minimum=1)
+        return_items = add_work(work_groups=work_groups, break_time=break_time, group=group, name=work,
+                                time_for_work=time, previous_works=previous_works)
+        work_groups = return_items["work_groups"]
     else:
         update_append(colored("There are no previous works add.", WARNING_COLOR))
         update_append(f"When you use '{colored("add work", command_color)}' or "
